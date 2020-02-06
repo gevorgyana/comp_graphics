@@ -25,14 +25,6 @@ class PointInPlaneSolution
     }
   }
 
-  /**
-   * Note that division by zero is avoided because the division is protected
-   * by the "if" clause which surrounds it. The function will return YES if
-   * the point x,y is inside the polygon, or NO if it is not.  If the point
-   * is exactly on the edge of the polygon, then the function may return
-   * YES or NO.
-   */
-
   void PointInPolygon(float x, float y)
   {
     cout << "Point (" << x << ", " << y << ") is being tested" << std::endl;
@@ -106,7 +98,6 @@ void CompleteCheck()
       GenerateTestcase(i, j);
     }
   }
-
   cout << "===complete test finished;===" << std::endl;
 }
 
