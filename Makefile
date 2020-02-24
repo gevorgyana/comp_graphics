@@ -1,7 +1,9 @@
-.PHONY: clean pslgpl
+.PHONY: clean
 
 clean:
-	rm pslgpl_chain_decomp
+	rm -f pslgplcd *.o pl
 
 pslgpl:
-	clang++ pslgplcd.cpp -o pslgpl_chain_decomp
+	clang++ pslgplcd.cpp -o pslgplcd
+pl:
+	clang++ point_location.cpp -o pl

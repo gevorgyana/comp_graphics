@@ -37,16 +37,16 @@ class Solution
     for (int i = 0; i < sz; ++i)
     {
       // find the ith smallest elements from the array
-      int min_element_index = i;
+      int max_element_index = i;
       for (int j = i + 1; j < sz; ++j)
       {
-        if (points[j].second < points[min_element_index].second)
+        if (points[j].second > points[max_element_index].second)
         {
-          min_element_index = j;
+          max_element_index = j;
         }
       }
-      m[min_element_index] = i;
-      iter_swap(points.begin() + i, points.begin() + min_element_index);
+      m[max_element_index] = i;
+      iter_swap(points.begin() + i, points.begin() + max_element_index);
     }
 
 
