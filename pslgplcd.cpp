@@ -53,7 +53,7 @@ class Solution
     cout << "the new array be like: " << endl;
     for (auto i : points)
     {
-      cout << i.first << " " << i.second << " ";
+      cout << i.first << " " << i.second << " | ";
     }
     cout << endl;
 
