@@ -32,10 +32,12 @@ class PointInPlaneSolution
     bool oddNodes = false;
     for (i = 0; i < poly_corners_; ++i) {
       if ((poly_y_coords_[i] < y && poly_y_coords_[j] >= y)
-          || (poly_y_coords_[j] < y && poly_y_coords_[i] >= y))
+          || (poly_y_coords_[j] < y && poly_y_coords_[i] >= y)) // if we have a promising point - means that if we have something that lies in between the y coords of the 2 points - jth and ith ones , otherwise we simply cannot intersect ANY edge going from i and j, because intersection means lying between the points in BOTH direction - Ox and Oy;
       {
         if (poly_x_coords_[i] + (y - poly_y_coords_[i]) / (poly_y_coords_[j] - poly_y_coords_[i]) *
             (poly_x_coords_[j] - poly_x_coords_[i]) < x)
+
+          // todo xplain this, done in paper
         {
           oddNodes = !oddNodes;
         }
