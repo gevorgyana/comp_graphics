@@ -4,9 +4,9 @@ run: pslgplcd
 	./pslgplcd
 
 clean:
-	rm -f pslgplcd *.o pl
+	rm -f pslgplcd *.o pl *.out
 
-pslgplcd:
+pslgplcd: pslgplcd.cpp
 	clang++ pslgplcd.cpp -o pslgplcd
 pl:
 	clang++ point_location.cpp -o pl

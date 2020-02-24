@@ -4,22 +4,34 @@
 #include <algorithm>
 #include <unordered_map>
 
-/**
- * Google C++ style guide compliant
-
- * This algorithm has been constructed after reading B10-699,
- * all credits to the authors!
- */
-
 namespace PSLG_Point_Location {
 using namespace std;
 
 class Solution
 {
  public:
-  Solution(vector<pair<double,double>> points, const vector<vector<int>>& edges)
+  Solution(const vector<pair<double,double>>& points, const vector<vector<int>>& edges)
   {
     cout << "PSLG Point Location with Chain Decomposition Solution object has been invoked" << endl;
+    cout << "Initial data..." << endl;
+    cout << "--- point # | coords (x) | coords(y) ---" << endl;
+    for (int i = 0; i < points.size(); ++i)
+    {
+      cout << i << " ";
+      cout << points[i].first << " " << points[i].second << endl;
+    }
+    cout << "--- edges : index -> [indices] ---" << endl;
+    int cur_node = 0;
+    for (auto i : edges)
+    {
+      cout << cur_node++ << " ";
+      for (auto j : i)
+      {
+        cout << " :" << j << " ";
+      }
+      cout << endl;
+    }
+
     points_ = points;
     edges_ = edges;
     int sz = points_.size();
@@ -40,23 +52,31 @@ class Solution
       int max_element_index = i;
       for (int j = i + 1; j < sz; ++j)
       {
-        if (points[j].second > points[max_element_index].second)
+        if (points_[j].second > points_[max_element_index].second)
         {
           max_element_index = j;
         }
       }
-      m[max_element_index] = i;
-      iter_swap(points.begin() + i, points.begin() + max_element_index);
+
+      m[i] = max_element_index;
+      iter_swap(points_.begin() + i, points_.begin() + max_element_index);
     }
 
-
     cout << "the new array be like: " << endl;
-    for (auto i : points)
+    for (auto i : points_)
     {
       cout << i.first << " " << i.second << " | ";
     }
     cout << endl;
 
+
+    for (int i = 0; i < sz; ++i)
+    {
+      if (m[i] != i)
+      {
+        m[m[i]] = i;
+      }
+    }
 
     cout << "the conversion looks like: " << endl;
     for (int i = 0; i < sz; ++i)
@@ -86,6 +106,7 @@ class Solution
 
 int main()
 {
-  PSLG_Point_Location::Solution s({{-1.0, 2.0}, {0.0, 1.0}}, {});
+  PSLG_Point_Location::Solution s({{0.0, 1.0}, {1.5, 2}, {3.0, 3.0}, {3.0, -1.0}}, // nodes
+                                  {{1, 2, 3}, {0, 3}, {0, 3}, {0, 1, 2}}); // edges
   return 0;
 }
