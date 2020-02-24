@@ -18,6 +18,7 @@ class Solution
  public:
   Solution(const vector<pair<double,double>>& points, const vector<vector<int>>& edges)
   {
+    cout << "PSLG Point Location with Chain Decomposition Solution object has been invoked" << endl;
     points_ = points;
     edges_ = edges;
 
@@ -31,6 +32,7 @@ class Solution
     {
       cout << p.first << " " << p.second << " ";
     }
+    cout << endl;
   }
 
  private:
