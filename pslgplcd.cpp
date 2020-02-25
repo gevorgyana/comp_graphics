@@ -3,10 +3,9 @@
 #include <utility>
 #include <algorithm>
 #include <map>
-
+#include <cmath>
 
 /**
-
 todo regularization, but it will bring even more complexity, first finish with a regular graph
  */
 
@@ -92,6 +91,8 @@ class Solution
 
     cout << "correct edges..." << endl;
 
+    map<pair<int,int>,int> e2weight;
+
     // now when we need to process an edge, we convert u and v to m[u] and m[v] respectively
     for (int i = 0; i < edges_.size(); ++i)
     {
@@ -105,12 +106,32 @@ class Solution
           // respect that edge
           rows[m[i]].push_back(m[v]);
           cols[m[v]].push_back(m[i]);
+          e2weight[make_pair(m[i], m[v])] = 1;
         }
       }
       cout << "]" << endl;
     }
 
-    // todo technically specaking we need to sort the edge and row lists!
+    // this is generally dangerous to do, but okay here
+    auto& pref = points_;
+
+    for (int i = 0; i < rows.size(); ++i)
+    {
+      sort(rows[i].begin(), rows[i].end(), [i, pref](int n, int m) {
+          double atan2n = atan2(pref[n].first - pref[i].first, pref[n].second - pref[i].second),
+              atan2m = atan2(pref[m].first - pref[i].first, pref[m].second - pref[i].second);
+          return atan2n < atan2m;
+        });
+    }
+
+    for (int i = 0; i < cols.size(); ++i)
+    {
+      sort(cols[i].begin(), cols[i].end(), [i, pref](int n, int m) {
+          double atan2n = atan2(pref[i].first - pref[n].first, pref[i].second - pref[n].second),
+              atan2m = atan2(pref[i].first - pref[m].first, pref[i].second - pref[m].second);
+          return atan2n < atan2m;
+        });
+    }
 
     /**
      * in the original article, the following structure is given
