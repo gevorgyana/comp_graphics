@@ -2,7 +2,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
-#include <unordered_map>
+#include <map>
 
 namespace PSLG_Point_Location {
 using namespace std;
@@ -35,13 +35,14 @@ class Solution
     points_ = points;
     edges_ = edges;
     int sz = points_.size();
-    vector<int> index_map(sz);
+
+
+    // cannot use unordered map with pair - try to compile and see why
+    map<pair<double,double>,int> p;
     for (int i = 0; i < sz; ++i)
     {
-      index_map[i] = i;
+      p[points_[i]] = i;
     }
-
-    unordered_map<int,int> m;
 
     // we will keep both the sorted array and the index map for future
     // reference (we will need to convert edge indices)
@@ -58,11 +59,10 @@ class Solution
         }
       }
 
-      m[i] = max_element_index;
       iter_swap(points_.begin() + i, points_.begin() + max_element_index);
     }
 
-    cout << "the new array be like: " << endl;
+    cout << "the new array: " << endl;
     for (auto i : points_)
     {
       cout << i.first << " " << i.second << " | ";
@@ -70,12 +70,10 @@ class Solution
     cout << endl;
 
 
+    vector<int> m(sz);
     for (int i = 0; i < sz; ++i)
     {
-      if (m[i] != i)
-      {
-        m[m[i]] = i;
-      }
+      m[p[points_[i]]] = i;
     }
 
     cout << "the conversion looks like: " << endl;
@@ -84,6 +82,10 @@ class Solution
       cout << m[i] << " ";
     }
     cout << endl;
+
+
+    // now when we need to process and edge, we convert u and v to m[u] and m[v] respectively
+
 
     // phase #1 ended - preprocessing done
   }
@@ -106,7 +108,11 @@ class Solution
 
 int main()
 {
+  PSLG_Point_Location::Solution s({{0.0, 3.0}, {1.5, 2}, {3.0, 1.0}, {3.0, 4.0}}, // nodes
+                                  {}); // edges
+  /*
   PSLG_Point_Location::Solution s({{0.0, 1.0}, {1.5, 2}, {3.0, 3.0}, {3.0, -1.0}}, // nodes
                                   {{1, 2, 3}, {0, 3}, {0, 3}, {0, 1, 2}}); // edges
+  */
   return 0;
 }
