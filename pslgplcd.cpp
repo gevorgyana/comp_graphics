@@ -4,6 +4,12 @@
 #include <algorithm>
 #include <map>
 
+
+/**
+
+todo regularization, but it will bring even more complexity, first finish with a regular graph
+ */
+
 namespace PSLG_Point_Location {
 using namespace std;
 
