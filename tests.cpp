@@ -31,8 +31,6 @@ void atan_sort_test()
   vector<int> row_list{0, 1, 2, 3};
   pair<double,double> start_point{0, 0}; // it is below the points_ ...
 
-  start_point = make_pair(1.5, 3);
-
   sort(row_list.begin(), row_list.end(), [start_point, &points_](int n, int m) {
       double atan2n = atan2(points_[n].first - start_point.first, points_[n].second - start_point.second),
           atan2m = atan2(points_[m].first - start_point.first, points_[m].second - start_point.second);
@@ -40,12 +38,28 @@ void atan_sort_test()
     });
 
 
-  cout << "the sorted sequence" << endl;
+  cout << "point is above; the sorted sequence" << endl;
   for (auto i : row_list)
   {
     cout << i << " ";
   }
   cout << endl;
+
+  start_point = make_pair(1.5, 3);
+  sort(row_list.begin(), row_list.end(), [start_point, &points_](int n, int m) {
+      double atan2n = atan2(start_point.first - points_[n].first, start_point.second - points_[n].second),
+          atan2m = atan2(start_point.first - points_[m].first, start_point.second - points_[m].second);
+      return atan2n < atan2m;
+    });
+
+
+  cout << "point is below; the sorted sequence" << endl;
+  for (auto i : row_list)
+  {
+    cout << i << " ";
+  }
+  cout << endl;
+
 }
 
 
