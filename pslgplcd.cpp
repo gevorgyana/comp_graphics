@@ -68,7 +68,6 @@ class Solution
     }
     cout << endl;
 
-
     vector<int> m(sz);
     for (int i = 0; i < sz; ++i)
     {
@@ -85,7 +84,9 @@ class Solution
     vector<vector<int>> rows(sz);
     vector<vector<int>> cols(sz);
 
-    // now when we need to process and edge, we convert u and v to m[u] and m[v] respectively
+    cout << "correct edges..." << endl;
+
+    // now when we need to process an edge, we convert u and v to m[u] and m[v] respectively
     for (int i = 0; i < edges_.size(); ++i)
     {
       cout << "from " << m[i] << " (old " << i << ") to [";
@@ -103,6 +104,32 @@ class Solution
       cout << "]" << endl;
     }
 
+    // todo technically specaking we need to sort the edge and row lists!
+
+    /**
+     * in the original article, the following structure is given
+     * for the edge and point vertex format:
+
+     * vertex node format:
+     *   values: # I
+     *   ptrs: pred, succ, col, row
+
+     * in this program, pred and succ are really indices in the outer vector of nodes;
+     * col and row are the indices of the inner array of edges, each vector has
+     * 2 associated vectors of (row and cilumn lists respectively);
+     * I is the cardinality of incoming edges, really is the size of [row/column] list
+     * # is point index in the sorted array of points
+
+     * edge node foramt:
+     *   value: weight
+     *   ptrs: up, down, col next, row next
+
+     * ptrs up and down are really the idnex and associated values of vector at that index
+     * next ptrs are indices too, they are need fortraversing only;
+
+     * to sum up, there are 2 vector for each point - edge list and row list,
+     * inside, indices to the sorted structure are stored, filtered thru m[.]
+     */
     // phase #1 ended - preprocessing done
   }
 
