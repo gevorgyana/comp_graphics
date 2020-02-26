@@ -146,7 +146,7 @@ class Solution
      * in this program, pred and succ are really indices in the outer vector of nodes;
      * col and row are the indices of the inner array of edges, each vector has
      * 2 associated vectors of (row and cilumn lists respectively);
-     * I is the cardinality of incoming edges, really is the size of [row/column] list
+     * I is the cardinality of incoming edges, really is the size of column list
      * # is point index in the sorted array of points
 
      * edge node foramt:
@@ -191,11 +191,13 @@ class Solution
       {
         cout << "debug statement; w_out > cols[i].size()" << endl;
         cout << "debug statement; cols[.].size() = " << cols[i].size() << endl;
-        cout << "before processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])] << endl;
-        e2weight[make_pair(i, cols[i][0])] = w_out - cols[i].size() + 1;
-        cout << "after processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])] << endl;
+        cout << "before processing the weight of edge i <- cols[.][0] = " << e2weight[make_pair(cols[i][0], i)] << endl;
+        e2weight[make_pair(cols[i][0], i)] = w_out - cols[i].size() + 1;
+        cout << "after processing the weight of edge i <- cols[.][0] = " << e2weight[make_pair(cols[i][0], i)] << endl;
       }
     }
+
+    // first pass finished
   }
 
  private:
