@@ -93,9 +93,6 @@ class Solution
 
     map<pair<int,int>,int> e2weight;
 
-    // check that we are doing the correct thing
-    // check what is inside the first element's in sorted order lis of outcoming edges
-
     // now when we need to process an edge, we convert u and v to m[u] and m[v] respectively
     for (int i = 0; i < edges_.size(); ++i)
     {
@@ -114,6 +111,8 @@ class Solution
       }
       cout << "]" << endl;
     }
+
+    // okay, it has been tested up to this point
 
     // this is generally dangerous to do, but okay here
     auto& pref = points_;
@@ -162,9 +161,20 @@ class Solution
      */
     // phase #1 ended - preprocessing done
 
+    // debug statement
+    for (int i = 0; i < cols.size(); ++i)
+    {
+      cout << i << " ## " << endl;
+      for (int j = 0; j < cols[i].size(); ++j)
+      {
+        cout << cols[i][j] << endl;
+      }
+    }
+    cout << "----" << endl;
 
-    /** this piece of code has not been tested yet*/
-    for (int i = sz - 2; i >= 0; --i)
+    /** this piece of code has not been tested*/
+
+    for (int i = sz - 2; i > 0; --i)
     {
       cout << "debug statement; iter #" << i << endl;
 
@@ -181,9 +191,9 @@ class Solution
       {
         cout << "debug statement; w_out > cols[i].size()" << endl;
         cout << "debug statement; cols[.].size() = " << cols[i].size() << endl;
-        cout << "before processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])];
+        cout << "before processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])] << endl;
         e2weight[make_pair(i, cols[i][0])] = w_out - cols[i].size() + 1;
-        cout << "after processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])];
+        cout << "after processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])] << endl;
       }
     }
   }
@@ -211,7 +221,7 @@ class Solution
 int main()
 {
 
-  // this is the example from the article needs to be modified as it it not regular!
+  // this is the example from the article; needs to be modified as it it not regular!
   PSLG_Point_Location::Solution s({{1, 1}, {4,2}, {3,4}, {3,3}},
                                   {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
   /*
