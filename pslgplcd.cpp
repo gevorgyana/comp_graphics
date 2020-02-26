@@ -161,16 +161,26 @@ class Solution
 
 
     /** this piece of code has not been tested yet*/
-    for (int i = 0; i < sz - 2; ++i)
+    for (int i = sz - 2; i >= 0; -i)
     {
-      int w_out = 0; // sum of weights in row list of v_{i}
+      cout << "debug statement; iter #" << i << endl;
+
+      int w_out = 0; // sum of weights in row list of v_{i} -- same as
+      // sum of weights of all edges coming down from v_{i}
       for (int j = 0; j < rows[i].size(); ++j)
       {
         w_out += e2weight[make_pair(i,rows[i][j])];
       }
+
+      cout << "debug statement; w_out" << w_out << endl;
+
       if (w_out > cols[i].size())
       {
+        cout << "debug statement; w_out > cols[i].size()" << endl;
+        cout << "debug statement; cols[.].size() = " << cols[i].size() << endl;
+        cout << "before processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])];
         e2weight[make_pair(i, cols[i][0])] = w_out - cols[i].size() + 1;
+        cout << "after processing the weight of edge i -> cols[.][0] = " << e2weight[make_pair(i, cols[i][0])];
       }
     }
   }
