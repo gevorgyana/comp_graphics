@@ -93,20 +93,23 @@ class Solution
 
     map<pair<int,int>,int> e2weight;
 
+    // check that we are doing the correct thing
+    // check what is inside the first element's in sorted order lis of outcoming edges
+
     // now when we need to process an edge, we convert u and v to m[u] and m[v] respectively
     for (int i = 0; i < edges_.size(); ++i)
     {
       cout << "from " << m[i] << " (old " << i << ") to [";
       for (int v = 0; v < edges_[i].size(); ++v)
       {
-        if (points_[m[i]].second > points_[m[v]].second
-            || (points_[m[i]].second == points_[m[v]].second && m[i] < m[v]))
+        if (points_[m[i]].second > points_[m[edges_[i][v]]].second
+            || (points_[m[i]].second == points_[m[edges_[i][v]]].second && m[i] < m[edges_[i][v]]))
         {
           cout << m[v] << " (old " << v << ")" << " ";
           // respect that edge
-          rows[m[i]].push_back(m[v]);
-          cols[m[v]].push_back(m[i]);
-          e2weight[make_pair(m[i], m[v])] = 1;
+          rows[m[i]].push_back(m[edges_[i][v]]);
+          cols[m[edges_[i][v]]].push_back(m[i]);
+          e2weight[make_pair(m[i], m[edges_[i][v]])] = 1;
         }
       }
       cout << "]" << endl;
@@ -161,7 +164,7 @@ class Solution
 
 
     /** this piece of code has not been tested yet*/
-    for (int i = sz - 2; i >= 0; -i)
+    for (int i = sz - 2; i >= 0; --i)
     {
       cout << "debug statement; iter #" << i << endl;
 
@@ -208,9 +211,9 @@ class Solution
 int main()
 {
 
-  // this is the example from the article
+  // this is the example from the article needs to be modified as it it not regular!
   PSLG_Point_Location::Solution s({{1, 1}, {4,2}, {3,4}, {3,3}},
-                                  {{2, 3, 1}, {0, 2, 3}, {0, 1}, {0, 1}});
+                                  {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
   /*
   PSLG_Point_Location::Solution s({{0.0, 3.0}, {1.5, 2}, {3.0, 1.0}, {3.0, 4.0}},
                                   {});

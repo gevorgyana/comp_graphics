@@ -10,3 +10,5 @@ pslgplcd: pslgplcd.cpp
 	clang++ pslgplcd.cpp -o pslgplcd
 pl:
 	clang++ point_location.cpp -o pl
+test:
+	g++ -g pslgplcd.cpp -o pslgplcd && gdb ./pslgplcd
