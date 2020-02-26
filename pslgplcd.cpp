@@ -158,6 +158,21 @@ class Solution
      * inside, indices to the sorted structure are stored, filtered thru m[.]
      */
     // phase #1 ended - preprocessing done
+
+
+    /** this piece of code has not been tested yet*/
+    for (int i = 0; i < sz - 2; ++i)
+    {
+      int w_out = 0; // sum of weights in row list of v_{i}
+      for (int j = 0; j < rows[i].size(); ++j)
+      {
+        w_out += e2weight[make_pair(i,rows[i][j])];
+      }
+      if (w_out > cols[i].size())
+      {
+        e2weight[make_pair(i, cols[i][0])] = w_out - cols[i].size() + 1;
+      }
+    }
   }
 
  private:
