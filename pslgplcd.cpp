@@ -172,8 +172,6 @@ class Solution
     }
     cout << "----" << endl;
 
-    /** this piece of code has not been tested*/
-
     for (int i = sz - 2; i > 0; --i)
     {
       cout << "debug statement; iter #" << i << endl;
@@ -197,7 +195,79 @@ class Solution
       }
     }
 
+    // tested until this point!
     // first pass finished
+
+    map<pair<int,int>,int> Imin, Imax, Rc, Lc;
+
+    // todo give these boys more meaningful names, but it is easier to
+    // follow the original naming convention from the article with them now
+    int A = 1, r = 2, L = 1, R = 1;
+
+    // todo use c++ accumulate here
+    int w_in = 0;
+    for (int i = 0; i < rows[0].size(); ++i)
+    {
+      w_in += e2weight[make_pair(i, rows[0][i])];
+    }
+
+    int i = 0;
+    while (i < sz - 1)
+    {
+      int w_out = 0;
+      for (int j = 0; j < rows[i].size(); ++j)
+      {
+        w_out += e2weight[make_pair(i, rows[i][j])];
+      }
+
+      int a = w_in - w_out;
+
+      for (int j = 0; j < rows[i].size(); ++j)
+      {
+        pair<int,int> e = make_pair(i, rows[i][j]);
+        Imin[e] = A;
+        Imax[e] = A + a + e2weight[e] - 1;
+
+        cout << "pred : " <<Imin[e] << " " << Imax[e] << ": is given an edge " << "(" << e.first << " " << e.second << endl;
+
+        // int c = pred(Imin[e], Imax[e]);
+        // link(c, e); // assign e to chaing c
+        if (j == 0)
+        {
+          Lc[e] = L;
+        } else
+        {
+          Lc[e] = r;
+          ++r;
+        }
+
+        if (j == rows[i].size() - 1)
+        {
+          Rc[e] = R;
+        } else
+        {
+          Rc[e] = r;
+        }
+
+        a = 0; A = Imax[e] + 1;
+      }
+
+      ++i; --r;
+      w_in = 0;
+      for (int j = 0; j < cols[i].size(); ++j)
+      {
+        w_in += e2weight[make_pair(cols[i][j], i)];
+      }
+
+      pair<int,int> d1 = make_pair(cols[i][0], i);
+      R = Rc[d1];
+      pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
+      L = Lc[d2];
+
+      A = Imin[d2];
+    }
+
+    // supposedly, this is the end of the algorithm
   }
 
  private:
