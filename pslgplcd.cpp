@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <map>
 #include <cmath>
+#include <numeric>
 
 /**
 todo regularization, but it will bring even more complexity, first finish with a regular graph
@@ -131,7 +132,7 @@ class Solution
       sort(cols[i].begin(), cols[i].end(), [i, pref](int n, int m) {
           double atan2n = atan2(pref[i].first - pref[n].first, pref[i].second - pref[n].second),
               atan2m = atan2(pref[i].first - pref[m].first, pref[i].second - pref[m].second);
-          return atan2n < atan2m;
+          return atan2n > atan2m;
         });
     }
 
@@ -202,34 +203,23 @@ class Solution
 
     // todo give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
-    int A = 1, r = 2, L = 1, R = 1;
+    int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
+    // outer regions if we take into account currnt part of the figure limited by 2 chains; initially these point to 0 - 0 is the name of the outer region out figure lies in
 
-    // todo use c++ accumulate here
-    int w_in = 0;
-    for (int i = 0; i < rows[0].size(); ++i)
-    {
-      w_in += e2weight[make_pair(i, rows[0][i])];
-    }
+    // r is the index of the regions we are about to mark; we maintain 1 such instance in the inner loop, it is enough
 
+    int w_in = accumulate(rows[0].begin(), rows[0].end(), 0);
     int i = 0;
     while (i < sz - 1)
     {
-      int w_out = 0;
-      for (int j = 0; j < rows[i].size(); ++j)
-      {
-        w_out += e2weight[make_pair(i, rows[i][j])];
-      }
-
+      int w_out = accumulate(rows[i].begin(), rows[i].end(), 0);
       int a = w_in - w_out;
-
       for (int j = 0; j < rows[i].size(); ++j)
       {
         pair<int,int> e = make_pair(i, rows[i][j]);
         Imin[e] = A;
         Imax[e] = A + a + e2weight[e] - 1;
-
         cout << "pred : " <<Imin[e] << " " << Imax[e] << ": is given an edge " << "(" << e.first << " " << e.second << endl;
-
         // int c = pred(Imin[e], Imax[e]);
         // link(c, e); // assign e to chaing c
         if (j == 0)
@@ -240,7 +230,6 @@ class Solution
           Lc[e] = r;
           ++r;
         }
-
         if (j == rows[i].size() - 1)
         {
           Rc[e] = R;
@@ -248,25 +237,23 @@ class Solution
         {
           Rc[e] = r;
         }
-
-        a = 0; A = Imax[e] + 1;
+        a = 0;
+        A = Imax[e] + 1;
       }
-
       ++i; --r;
-      w_in = 0;
-      for (int j = 0; j < cols[i].size(); ++j)
-      {
-        w_in += e2weight[make_pair(cols[i][j], i)];
-      }
-
+      w_in = accumulate(cols[i].begin(), cols[i].end(), 0);
       pair<int,int> d1 = make_pair(cols[i][0], i);
       R = Rc[d1];
       pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
-      L = Lc[d2];
 
+
+      cout << "debug; " << d1.first << " " << d1.second << endl;
+      cout << "debug; " << d2.first << " " << d2.second << endl;
+
+
+      L = Lc[d2];
       A = Imin[d2];
     }
-
     // supposedly, this is the end of the algorithm
   }
 
