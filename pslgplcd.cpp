@@ -203,16 +203,31 @@ class Solution
 
     // todo give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
-    int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
+    int A = 1, r = 1, L = 0, R = 0; // L and R are for marking the
     // outer regions if we take into account currnt part of the figure limited by 2 chains; initially these point to 0 - 0 is the name of the outer region out figure lies in
 
     // r is the index of the regions we are about to mark; we maintain 1 such instance in the inner loop, it is enough
 
-    int w_in = accumulate(rows[0].begin(), rows[0].end(), 0);
+
+    // todo document it! A means the distance between the bois, it is needed at the very beginning; checkthe first stpe of the algorithm to see what happens if we set it to 0! it needs to be set to 1 at the very beginning
+
+    // todo fix the below loop, it can be rewritten more concisely
+    int w_in = 0;
+    for (int k = 0; k < rows[0].size(); ++k)
+    {
+      w_in += (e2weight[make_pair(0, rows[0][k])]);
+    }
+
     int i = 0;
     while (i < sz - 1)
     {
-      int w_out = accumulate(rows[i].begin(), rows[i].end(), 0);
+      int w_out = 0;
+
+      for (int k = 0; k < rows[i].size(); ++k)
+      {
+        w_out += (e2weight[make_pair(i, rows[i][k])]);
+      }
+
       int a = w_in - w_out;
       for (int j = 0; j < rows[i].size(); ++j)
       {
@@ -241,7 +256,13 @@ class Solution
         A = Imax[e] + 1;
       }
       ++i; --r;
-      w_in = accumulate(cols[i].begin(), cols[i].end(), 0);
+
+      w_in = 0;
+      for (int k = 0; k < cols[i].size(); ++k)
+      {
+        w_in += e2weight[make_pair(cols[i][k], i)];
+      }
+
       pair<int,int> d1 = make_pair(cols[i][0], i);
       R = Rc[d1];
       pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
