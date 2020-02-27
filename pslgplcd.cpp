@@ -13,6 +13,71 @@ todo regularization, but it will bring even more complexity, first finish with a
 namespace PSLG_Point_Location {
 using namespace std;
 
+
+// not tested
+int lca(int i, int j, int lvl)
+{
+  // we know i is the minimum element
+  // try to reach one level more, and see what happens
+  // will we reach what we want to in 1 elvelation?
+
+  // we need to know the direction
+
+  int sign = 1;
+  int rem = i / pow(2, lvl);
+  int k = 1;
+  while(k != rem)
+  {
+    k += 2;
+    sign *= -1;
+  }
+
+  // move one step up
+  int move_diff = pow(2, lvl);
+
+  int i_ = sign * move_diff;
+
+  // if j is inside
+  int i_range_r = i_;
+  int i_range_l = i_;
+  int l = 0;
+  while (l != lvl + 2) // or 1 - check
+  {
+    i_range_r += pow(2, l);
+    i_range_l -= pow(2, l);
+    ++l;
+  }
+
+  if (i_range_l <= j && i_range_r >= j)
+    return i_;
+  return lca(i_, j, lvl + 1);
+}
+
+//not tested
+int LCA(int i, int j)
+{
+  // find the level of both elements in the tree
+  int level_i = 0;
+  int two_p_level_i = 1;
+  while (i % two_p_level_i == i)
+  {
+    two_p_level_i *= 2;
+    ++level_i;
+  }
+
+  int level_j = 0;
+  int two_p_level_j = 1;
+  while (j % two_p_level_j == 0)
+  {
+    two_p_level_j *= 2;
+    ++level_j;
+  }
+
+  if (level_i < level_j)
+    return lca(i, j, level_i);
+  return lca(j, i, level_j);
+}
+
 class Solution
 {
  public:
@@ -206,12 +271,12 @@ class Solution
     // first pass finished
 
 
-    for (int i = 0; i < rows[0].size(); ++i)
-    {
-      cout << rows[0][i] << " ";
-    }
+    // for (int i = 0; i < rows[0].size(); ++i)
+    // {
+    //   cout << rows[0][i] << " ";
+    // }
 
-    cout << "-=-=-=-=-" << endl;
+    // cout << "-=-=-=-=-" << endl;
 
     map<pair<int,int>,int> Imin, Imax, Rc, Lc;
 
@@ -280,6 +345,8 @@ class Solution
         w_in += e2weight[make_pair(cols[i][k], i)];
       }
 
+      cout << w_in << endl;
+
       pair<int,int> d1 = make_pair(cols[i][0], i);
       R = Rc[d1];
       pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
@@ -293,6 +360,8 @@ class Solution
       A = Imin[d2];
     }
     // supposedly, this is the end of the algorithm
+
+    // need to test it more extensively, but to thispoints seems correct
   }
 
  private:
