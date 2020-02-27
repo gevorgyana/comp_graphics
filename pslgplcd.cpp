@@ -123,7 +123,10 @@ class Solution
       sort(rows[i].begin(), rows[i].end(), [i, pref](int n, int m) {
           double atan2n = atan2(pref[n].first - pref[i].first, pref[n].second - pref[i].second),
               atan2m = atan2(pref[m].first - pref[i].first, pref[m].second - pref[i].second);
-          return atan2n < atan2m;
+
+          //experimental
+          //return atan2n < atan2m;
+          return pref[n].first < pref[m].first;
         });
     }
 
@@ -132,7 +135,10 @@ class Solution
       sort(cols[i].begin(), cols[i].end(), [i, pref](int n, int m) {
           double atan2n = atan2(pref[i].first - pref[n].first, pref[i].second - pref[n].second),
               atan2m = atan2(pref[i].first - pref[m].first, pref[i].second - pref[m].second);
-          return atan2n > atan2m;
+
+          // experimental
+          // return atan2n > atan2m;
+          return pref[n].first > pref[m].first;
         });
     }
 
@@ -199,17 +205,28 @@ class Solution
     // tested until this point!
     // first pass finished
 
+
+    for (int i = 0; i < rows[0].size(); ++i)
+    {
+      cout << rows[0][i] << " ";
+    }
+
+    cout << "-=-=-=-=-" << endl;
+
     map<pair<int,int>,int> Imin, Imax, Rc, Lc;
 
     // todo give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
-    int A = 1, r = 1, L = 0, R = 0; // L and R are for marking the
+    int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
     // outer regions if we take into account currnt part of the figure limited by 2 chains; initially these point to 0 - 0 is the name of the outer region out figure lies in
 
     // r is the index of the regions we are about to mark; we maintain 1 such instance in the inner loop, it is enough
 
 
     // todo document it! A means the distance between the bois, it is needed at the very beginning; checkthe first stpe of the algorithm to see what happens if we set it to 0! it needs to be set to 1 at the very beginning
+
+
+    // udpte: A si 0 at the very beginning, it is the index os the leftmost edge, so 0-based
 
     // todo fix the below loop, it can be rewritten more concisely
     int w_in = 0;
