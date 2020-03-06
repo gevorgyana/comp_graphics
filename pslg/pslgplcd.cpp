@@ -56,10 +56,13 @@ int lca(int i, int j, int lvl)
 //not tested
 int LCA(int i, int j)
 {
+  // it crashed - not tested (((((
+  // return 1;
+
   // find the level of both elements in the tree
   int level_i = 0;
   int two_p_level_i = 1;
-  while (i % two_p_level_i == i)
+  while (i % two_p_level_i == 0)
   {
     two_p_level_i *= 2;
     ++level_i;
@@ -317,6 +320,13 @@ class Solution
         Imin[e] = A;
         Imax[e] = A + a + e2weight[e] - 1;
         cout << "pred : " <<Imin[e] << " " << Imax[e] << ": is given an edge " << "(" << e.first << " " << e.second << endl;
+
+
+
+        // --- experimental
+        int c = LCA(Imin[e], Imax[e]);
+
+
         // int c = pred(Imin[e], Imax[e]);
         // link(c, e); // assign e to chaing c
         if (j == 0)
@@ -367,20 +377,6 @@ class Solution
  private:
   vector<pair<double,double>> points_;
   vector<vector<int>> edges_;
-  struct EdgeNodeFormat
-  {
-    int up;
-    int down;
-    int col_next;
-    int row_next;
-  };
-  struct VertexNodeFormat
-  {
-    int pred;
-    int succ;
-    int col;
-    int row;
-  };
 };
 } // ns PSLG_Point_Location
 
@@ -388,9 +384,10 @@ int main()
 {
 
   // this is the example from the article; needs to be modified as it it not regular!
+
   PSLG_Point_Location::Solution s({{1, 1}, {4,2}, {3,4}, {3,3}},
-                                  {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
-  /*
+  {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
+      /*
   PSLG_Point_Location::Solution s({{0.0, 3.0}, {1.5, 2}, {3.0, 1.0}, {3.0, 4.0}},
                                   {});
   */

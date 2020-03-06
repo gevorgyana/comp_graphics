@@ -47,20 +47,29 @@ int p2(int x)
  */
 int move(int x)
 {
-  int standard_x = p2(x);
+  // currently iterated thru p2-th level of the tree
+  int standard_x = pow(2, p2(x));
   int next_x = standard_x;
   int to_the_right = true;
   while (next_x != x)
   {
-    to_the_right = false;
+    cout << next_x << endl;
+    to_the_right = !to_the_right;
     next_x += standard_x * 2;
   }
+
+  cout << ( (to_the_right ? "right " : " left "));
+  return x + standard_x  * ((to_the_right ? 1 : -1 ));
 }
 
 int main()
 {
-  cout << endl;
   cout << "application is running" << endl;
-  cout << p2(2);
+  int x;
+  while(true)
+  {
+    std::cin >> x;
+    cout << move(x) << endl;
+  }
   return 0;
 }
