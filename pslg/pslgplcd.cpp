@@ -13,73 +13,73 @@ todo regularization, but it will bring even more complexity, first finish with a
 namespace PSLG_Point_Location {
 using namespace std;
 
+/**
+   tree used for reference
 
-// not tested
-int lca(int i, int j, int lvl)
+        4
+     2     6
+    1 3   5 7
+
+    p(x) - max power of 2 in x
+
+    if p(x) = p_, it means that x is located on level p_ from
+    the bottom (bottom is level 0)
+
+    leading number l(x) = (2 ** p(x))
+
+    if we divide the whole row by the leading number l,
+    we get 1, 3, ... sequence;
+
+    then scroll all the possible numbers from this range to eventully
+    meet the desired x
+
+    this will take O(current height), where height changes from log2(n) to 1,
+    with step = -2
+
+ */
+
+// find the max power of 2 in @x
+int p2(int x)
 {
-  // we know i is the minimum element
-  // try to reach one level more, and see what happens
-  // will we reach what we want to in 1 elvelation?
-
-  // we need to know the direction
-
-  int sign = 1;
-  int rem = i / pow(2, lvl);
-  int k = 1;
-  while(k != rem)
+  int p = 0;
+  int pp = 1;
+  while (x % static_cast<int>(pow(2, pp)) == 0)
   {
-    k += 2;
-    sign *= -1;
+    ++p;
+    pp *= 2;
   }
-
-  // move one step up
-  int move_diff = pow(2, lvl);
-
-  int i_ = sign * move_diff;
-
-  // if j is inside
-  int i_range_r = i_;
-  int i_range_l = i_;
-  int l = 0;
-  while (l != lvl + 2) // or 1 - check
-  {
-    i_range_r += pow(2, l);
-    i_range_l -= pow(2, l);
-    ++l;
-  }
-
-  if (i_range_l <= j && i_range_r >= j)
-    return i_;
-  return lca(i_, j, lvl + 1);
+  return p;
 }
 
-//not tested
-int LCA(int i, int j)
+/**
+ * returns the parent of x in standard search heirarchy
+ */
+int move(int x)
 {
-  // it crashed - not tested (((((
-  // return 1;
-
-  // find the level of both elements in the tree
-  int level_i = 0;
-  int two_p_level_i = 1;
-  while (i % two_p_level_i == 0)
+  // currently iterated thru p2-th level of the tree
+  int standard_x = pow(2, p2(x));
+  int next_x = standard_x;
+  int to_the_right = true;
+  while (next_x != x)
   {
-    two_p_level_i *= 2;
-    ++level_i;
+    cout << next_x << endl;
+    to_the_right = !to_the_right;
+    next_x += standard_x * 2;
   }
 
-  int level_j = 0;
-  int two_p_level_j = 1;
-  while (j % two_p_level_j == 0)
-  {
-    two_p_level_j *= 2;
-    ++level_j;
-  }
-
-  if (level_i < level_j)
-    return lca(i, j, level_i);
-  return lca(j, i, level_j);
+  cout << ( (to_the_right ? "right " : " left "));
+  return x + standard_x  * ((to_the_right ? 1 : -1 ));
 }
+
+int lca(int l, int r)
+{
+  while ((l - (p2(l) - 1) > r) || (l + (p2(l) - 1) < r))
+    l = move(l);
+  return l;
+}
+
+
+
 
 class Solution
 {
@@ -323,8 +323,8 @@ class Solution
 
 
 
-        // --- experimental
-        int c = LCA(Imin[e], Imax[e]);
+        // --- +- experimental
+        int c = lca(Imin[e], Imax[e]);
 
 
         // int c = pred(Imin[e], Imax[e]);
