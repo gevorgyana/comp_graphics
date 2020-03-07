@@ -51,6 +51,79 @@ int p2(int x)
   return p;
 }
 
+int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
+{
+  /**
+   * from -> to
+   *
+   */
+
+  // todo check that it works on all quadrants
+
+  // construct the line passing thru from and to points
+  // then, if we continue moving along this line and stay at x point equal to that of the point
+  // being checked, what is out y value? maybe it is higher, or lower? check and return the result
+  double slope = (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
+  double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x;
+
+  int supposed_y = (a + checked.first * slope);
+
+
+  return (supposed_y > checked.second);
+}
+
+
+/************very big todo check direction functions***/
+int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
+{
+
+  /**
+   * from -> to
+   *
+   */
+
+  // todo check that it works on all quadrants
+
+  // construct the line passing thru from and to points
+  // then, if we continue moving along this line and stay at x point equal to that of the point
+  // being checked, what is out y value? maybe it is higher, or lower? check and return the result
+  double slope = (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
+  double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x;
+
+  int supposed_y = (a + checked.first * slope);
+
+
+  return (supposed_y < checked.second);
+}
+
+/*
+ * move left in the standard heirarchy
+ * todo test
+**/
+int left(int y)
+{
+  /*
+   * in this case,
+   *   y
+   * x
+   * return x
+
+   * y covers exactly (2^(p2(y)) elements) (excluding itself, i.e. strong inclusion)
+   * x is the top element in the left half of them
+  **/
+
+  return y - (y / 2);
+}
+
+/*
+ * move right in the standard heirarchy
+ * todo test
+**/
+int right(int y)
+{
+  return y + (y / 2);
+}
+
 /**
  * returns the parent of x in standard search heirarchy
  */
@@ -417,7 +490,107 @@ class Solution
       }
       cout << endl;
     }
+
+    cout << "chain tree has been constructed; searching now..." << endl;
+    // example point
+
+    // todo make this double-based
+    pair<int,int> checked_point(1, 2);
+
+    /**
+       small comment:
+       the chain tree has an implicit root;
+       on top of it is the chain that has the maximum index (see examples below)
+           4 <- chain 4 is on top
+         2
+       1  3
+
+       we always start searching from this chain
+       it is by definiton the top edge in the tree induced by binary searching
+       procedure
+
+       first we select the chain we are going to discriminate the point against
+
+     */
+
+    /*
+     * large todo - need to check how it works
+    **/
+
+
+    // filter the point according to its height todo
+    // check that the point indeed lies in between the max and min y-coords
+
+    // todo the tree that is constructed stores more slots than needed now; fix that;
+
+    int j = 3; // this is hardcoded for now; but later will be assigned to
+               // get_root_chain(max_chain_index); actually this function needs only the the number of
+               // chains
+
+    int mi = 4; // this is the number of chains(not the index of the last one!)
+    int l = -1; // -1 = 0 - 1 = starting point - 1;
+    int ri = mi; // where mi is  the number of chains todo (last index + 1 really)
+
+    int region_mark; // stores the mark that points to the region where the points lies
+
+    while (l + 1 != ri)
+    {
+      if (l >= j)
+      {
+        j = right(j);
+        continue;
+      }
+
+      if (ri <= j)
+      {
+        j = left(j);
+        continue;
+      }
+
+      pair<int,int> chosen_edge; // stores the indices that lead to the first and last parts of
+      // the chosen edge
+
+      // iterate over all the elements from j-th chain
+      for (auto& e : chains[j])
+      {
+        // hope that it works todo
+        bool found = (checked_point.second <= (points_[e.first].second) &&
+                      checked_point.second >= (points_[e.second].second));
+        if (found) {// if the tested point lies inside the y coords of the chosen edge
+                   // there is one according to the invariant that we have protected above
+          chosen_edge = e;
+
+          cout << "making sure that the point's y value:  " << checked_point.second << " is "
+               << "inside the edge: " << "from " << chosen_edge.first << " to " <<
+              chosen_edge.second << endl;
+
+          break;
+        }
+      }
+
+      // now we got the edge, need to check if it is on the left side or the right one
+      if (right_from_edge(points_[(chosen_edge.first)],
+                          points_[(chosen_edge.second)], checked_point))
+      {
+        l = Imax[chosen_edge];
+        region_mark = Rc[chosen_edge];
+      }
+      else if (left_from_edge(points_[(chosen_edge.first)],
+                              points_[(chosen_edge.second)], checked_point))
+      {
+        ri = Imin[chosen_edge];
+        region_mark = Lc[chosen_edge];
+      }
+      else // else if lies on the edge and we cannot really provide an answer - return
+      {
+        // do nothing, this should not happen
+        // for now
+        throw std::runtime_error("not implemented");
+      }
+    }
+
   }
+
 
  private:
   vector<pair<double,double>> points_;
