@@ -67,19 +67,26 @@ int move(int x)
     next_x += standard_x * 2;
   }
 
-  cout << ( (to_the_right ? "right " : " left "));
   return x + standard_x  * ((to_the_right ? 1 : -1 ));
 }
 
 int lca(int l, int r)
 {
-  while ((l - (p2(l) - 1) > r) || (l + (p2(l) - 1) < r))
+  ++l; ++r; // we can only work with 1-based indices
+  // cout << "survived to this points 1" << endl;
+  // cout << l <<  " " << r << endl;
+
+  int p2_ = p2(l);
+
+  // cout << "survived to this point 2" << endl;
+  // cout << p2_ << endl;
+
+  while ((l - (pow(2, p2(l)) - 1) > r) || (l + (pow(2, p2(l)) - 1) < r))
     l = move(l);
+
+  // cout << "stopped executing at point 3" << endl;
   return l;
 }
-
-
-
 
 class Solution
 {
@@ -293,8 +300,16 @@ class Solution
 
     // todo document it! A means the distance between the bois, it is needed at the very beginning; checkthe first stpe of the algorithm to see what happens if we set it to 0! it needs to be set to 1 at the very beginning
 
-
     // udpte: A si 0 at the very beginning, it is the index os the leftmost edge, so 0-based
+
+    /*
+      adding chains to the chain structure fixme hardcoded 10
+    **/
+
+    // update A will also be responsible for all edge indices!
+    // update A is the index of the current leftmost edge +-?
+
+    vector<vector<pair<int,int>>> chains(10, vector<pair<int,int>>());
 
     // todo fix the below loop, it can be rewritten more concisely
     int w_in = 0;
@@ -319,16 +334,35 @@ class Solution
         pair<int,int> e = make_pair(i, rows[i][j]);
         Imin[e] = A;
         Imax[e] = A + a + e2weight[e] - 1;
-        cout << "pred : " <<Imin[e] << " " << Imax[e] << ": is given an edge " << "(" << e.first << " " << e.second << endl;
-
-
+        cout << "pred : " << Imin[e] << " " << Imax[e] << ": is given an edge " << "("
+             << e.first << " " << e.second << endl;
 
         // --- +- experimental
+
+        // c must be decreased by 1, see the docs fir lca
         int c = lca(Imin[e], Imax[e]);
 
+        /**
+           short reminder:
+           the fact Imin(e) is the minimal chain index that contains this edge e;
+                    Imax(e) is the maximal one;
 
-        // int c = pred(Imin[e], Imax[e]);
-        // link(c, e); // assign e to chaing c
+           lca(l, r) here means that before we search for chain r, we search for chain l;
+
+           1 - 2 - 3 I
+           1 - 2 - 4 J
+           these are 2 chains
+           it may be confusing tha the parent of I is J, but is is chosed to be this way
+           deliberatey
+
+           indeed, one of them will be missing, todo maybe i need to add both of them as predecessors?
+         */
+
+        cout << "lca checking edge: " << e.first << " and " << e.second << endl;
+        cout << "lca of (is)" << Imin[e] << " and " << Imax[e] << " is " << c - 1 << endl;
+        // link(c, e); // assign e to chain c
+        chains[c - 1].push_back(e);
+
         if (j == 0)
         {
           Lc[e] = L;
@@ -361,17 +395,28 @@ class Solution
       R = Rc[d1];
       pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
 
-
       cout << "debug; " << d1.first << " " << d1.second << endl;
       cout << "debug; " << d2.first << " " << d2.second << endl;
-
 
       L = Lc[d2];
       A = Imin[d2];
     }
-    // supposedly, this is the end of the algorithm
 
+    // end of preprocessing
     // need to test it more extensively, but to thispoints seems correct
+    cout<< "Printing the chain structure" << endl;
+
+    int vi = 0;
+
+    for (auto v : chains)
+    {
+      cout << "Chain number " << vi++ << " is consituted by the following edges" << endl;
+      for (auto& j : v)
+      {
+        cout <<  j.first << "->" << j.second << endl;
+      }
+      cout << endl;
+    }
   }
 
  private:
@@ -382,11 +427,13 @@ class Solution
 
 int main()
 {
+  // std::cout << PSLG_Point_Location::lca(0, 1) << std::endl;
+
 
   // this is the example from the article; needs to be modified as it it not regular!
 
   PSLG_Point_Location::Solution s({{1, 1}, {4,2}, {3,4}, {3,3}},
-  {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
+                                  {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
       /*
   PSLG_Point_Location::Solution s({{0.0, 3.0}, {1.5, 2}, {3.0, 1.0}, {3.0, 4.0}},
                                   {});
