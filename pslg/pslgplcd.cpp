@@ -6,6 +6,10 @@
 #include <cmath>
 #include <numeric>
 
+/*
+ * todo after refactoring support verbose flags
+**/
+
 /**
 todo regularization, but it will bring even more complexity, first finish with a regular graph
  */
@@ -69,7 +73,7 @@ int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
   int supposed_y = (a + checked.first * slope);
 
 
-  return (supposed_y > checked.second);
+  return (supposed_y < checked.second);
 }
 
 
@@ -93,7 +97,7 @@ int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
   int supposed_y = (a + checked.first * slope);
 
 
-  return (supposed_y < checked.second);
+  return (supposed_y > checked.second);
 }
 
 /*
@@ -491,12 +495,6 @@ class Solution
       cout << endl;
     }
 
-    cout << "chain tree has been constructed; searching now..." << endl;
-    // example point
-
-    // todo make this double-based
-    pair<int,int> checked_point(1, 2);
-
     /**
        small comment:
        the chain tree has an implicit root;
@@ -517,68 +515,134 @@ class Solution
      * large todo - need to check how it works
     **/
 
+    cout << "chain tree has been constructed; searching now..." << endl;
+    // large todo make this double-based, now the code works with integers only
+    pair<int,int> checked_point(1, 2);
 
     // filter the point according to its height todo
     // check that the point indeed lies in between the max and min y-coords
 
-    // todo the tree that is constructed stores more slots than needed now; fix that;
+    // todo fix magic numbers
+    int min_y_coord = 100,
+        max_y_coord = -100;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      if (min_y_coord > points_[i].second)
+      {
+        min_y_coord = points_[i].second;
+      }
+
+      if (max_y_coord < points_[i].second)
+      {
+        max_y_coord = points_[i].second;
+      }
+    }
+
+    cout << "min coord (y) is " << min_y_coord << endl;
+    cout << "max coord (y) is " << max_y_coord << endl;
+
+    // large todo move this out of the constructor - this code does not belong here...
+
+    // think about the non-strict check...
+    if (checked_point.second <= min_y_coord | checked_point.second >= max_y_coord)
+      cout << "the given point lies outside of the planar straight line graph" <<
+          endl;
+
+    // todo the tree that is constructed stores more slots than
+    // needed now(hardcoded 10); fix that;
 
     int j = 3; // this is hardcoded for now; but later will be assigned to
-               // get_root_chain(max_chain_index); actually this function needs only the the number of
-               // chains
+               // get_root_chain(max_chain_index); actually this
+               // function needs only the the number of
+               // chains, it then finds the lca of 2 boundary elements
+               // which happens to be the root element
 
-    int mi = 4; // this is the number of chains(not the index of the last one!)
-    int l = -1; // -1 = 0 - 1 = starting point - 1;
-    int ri = mi; // where mi is  the number of chains todo (last index + 1 really)
+    // this value should be computed somewhere, i am not doing it now, but it needs
+    // to be done somewhere above when we handle chains, or maybe in another place,
+    // need to think about it
+    int mi = 4; // this is the number of chains(1 + the index of the last one!)
 
-    int region_mark; // stores the mark that points to the region where the points lies
+    // todo rename these; these two are responsible for binary search process;
+    // they are the left and right boundary chains currently considered respectively
+    int l = -1;  // first chain's index - 1;
+    int ri = mi; // last index + 1 really
+
+    int region_mark; // stores the mark that points to the region where the
+                     // points lies
 
     while (l + 1 != ri)
     {
+      cout << "current chain is " << j << endl;
+
       if (l >= j)
       {
+        cout << "moving to the right from " << j << " to " << right(j) << endl;
         j = right(j);
         continue;
       }
 
       if (ri <= j)
       {
+        cout << "moving to the left from " << j << " to " << left(j) << endl;
         j = left(j);
         continue;
       }
 
-      pair<int,int> chosen_edge; // stores the indices that lead to the first and last parts of
-      // the chosen edge
+      pair<int,int> chosen_edge; // stores the index that leads to the
+                                 // first and last parts of
+                                 // the chosen edge
+
+      cout << "checking in this chain : " << endl;
+      for (auto &e : chains[j])
+      {
+        cout << e.first << " -> " << e.second << " (indices to vetices)" << endl;
+      }
 
       // iterate over all the elements from j-th chain
       for (auto& e : chains[j])
       {
-        // hope that it works todo
+        cout << "checking if the checked point lies between this edge: " <<
+            e.first << " -> " << e.second << endl;
         bool found = (checked_point.second <= (points_[e.first].second) &&
                       checked_point.second >= (points_[e.second].second));
-        if (found) {// if the tested point lies inside the y coords of the chosen edge
-                   // there is one according to the invariant that we have protected above
+        if (found)
+        {// if the tested point lies inside the y coords of the chosen edge
+         // there is one according to the invariant that we have protected above
           chosen_edge = e;
-
-          cout << "making sure that the point's y value:  " << checked_point.second << " is "
-               << "inside the edge: " << "from " << chosen_edge.first << " to " <<
-              chosen_edge.second << endl;
-
+          cout << "the checked_point's y value:  "
+               << checked_point.second << " lies "
+               << "inside the edge: " << "from " << chosen_edge.first
+               << " to " << chosen_edge.second << endl;
+          cout << "in other words, " << checked_point.second << " <= " <<
+              (points_[e.first].second) << " and " << chosen_edge.second <<
+              " >= " << (points_[e.second].second) << endl;
           break;
         }
+
+        cout << "tried to check with edge "<< e.first << "->" << e.second
+             << ", moving on to the next one" << endl;
       }
 
       // now we got the edge, need to check if it is on the left side or the right one
       if (right_from_edge(points_[(chosen_edge.first)],
                           points_[(chosen_edge.second)], checked_point))
       {
+        cout << "the tested points lies to the right side of the chosed edge" << endl;
         l = Imax[chosen_edge];
+        cout << "new rightmost index is " << l << endl;
+        cout << "region mark update " << region_mark << " -> " <<
+            Rc[chosen_edge] << endl;
         region_mark = Rc[chosen_edge];
       }
       else if (left_from_edge(points_[(chosen_edge.first)],
                               points_[(chosen_edge.second)], checked_point))
       {
+        cout << "the tested point lies to the left side of the chosed edge" << endl;
         ri = Imin[chosen_edge];
+        cout << "new rightmost index is " << ri << endl;
+        cout << "region mark update " << region_mark << " -> " <<
+            Lc[chosen_edge] << endl;
         region_mark = Lc[chosen_edge];
       }
       else // else if lies on the edge and we cannot really provide an answer - return
