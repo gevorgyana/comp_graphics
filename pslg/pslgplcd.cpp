@@ -5,6 +5,7 @@
 #include <map>
 #include <cmath>
 #include <numeric>
+#include <cstdio>
 
 /*
  * todo after refactoring support verbose flags
@@ -55,48 +56,71 @@ int p2(int x)
   return p;
 }
 
+/**
+ * as all the edges are directed to the bottom, the following functions work properly:
+ * left_from_edge and right_from_egde
+ */
+
 int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 {
-  /**
-   * from -> to
-   *
-   */
+  cout << "testing left_from_edge with the following parameters" << endl;
+  cout << "from " <<  from.first << " " << from.second << " -> " << to.first <<
+      to.second << "against this point : " << checked.first << " " << checked.second <<
+      endl;
 
   // todo check that it works on all quadrants
 
-  // construct the line passing thru from and to points
-  // then, if we continue moving along this line and stay at x point equal to that of the point
-  // being checked, what is out y value? maybe it is higher, or lower? check and return the result
-  double slope = (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
-  double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x;
+  // delta(y) / delta(x)
+
+  // todo fix this barbarian cast magin
+  double slope = 1.0 * (to.second - from.second) / (to.first - from.first);
+
+  cout << "slope " << slope << endl;
+
+  // a(y value) = from.y - slope * from.x;
+  double a = from.second - slope * from.first;
+
+  cout << "a parameter value : "  << a << endl;
 
   int supposed_y = (a + checked.first * slope);
 
+  cout << "supposed_y : " << supposed_y << endl;
 
+  cout << "stopped left_from_edge" << endl;
+
+
+  if (slope > 0)
+    return (supposed_y > checked.second);
   return (supposed_y < checked.second);
 }
-
 
 /************very big todo check direction functions***/
 int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 {
 
-  /**
-   * from -> to
-   *
-   */
+  cout << "testing right_from_edge with the following parameters" << endl;
+  cout << "from " <<  from.first << " " << from.second << " -> " << to.first <<
+      to.second << "against this point : " << checked.first << " " << checked.second << endl;
 
   // todo check that it works on all quadrants
 
   // construct the line passing thru from and to points
   // then, if we continue moving along this line and stay at x point equal to that of the point
   // being checked, what is out y value? maybe it is higher, or lower? check and return the result
-  double slope = (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
+  double slope = 1.0 * (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
+  cout << "slope : " << slope << endl;
+
   double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x;
+  cout << "beginning point (a parameter): " << a << endl;
 
   int supposed_y = (a + checked.first * slope);
+  cout << "supposed_y " << supposed_y << endl;
 
+  cout << "finished working with right_from_edge" << endl;
 
+  /** here we can also check if they are equal, it means the point is on the line*/
+  if (slope > 0)
+    return (supposed_y < checked.second);
   return (supposed_y > checked.second);
 }
 
@@ -106,6 +130,14 @@ int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 **/
 int left(int y)
 {
+  // do not forget to convert to 1-based indexing
+  ++y;
+
+  if (y % 2 == 1) // the output is really not well-defined for the bottom row
+                  // in the binary tree
+  {
+    return y;
+  }
   /*
    * in this case,
    *   y
@@ -125,6 +157,16 @@ int left(int y)
 **/
 int right(int y)
 {
+  // convert y to 1-based indexing
+  ++y;
+
+
+  if (y % 2 == 1) // the output is really not well-defined for the bottom row
+                  // in the binary tree
+  {
+    return y;
+  }
+
   return y + (y / 2);
 }
 
@@ -574,18 +616,21 @@ class Solution
     while (l + 1 != ri)
     {
       cout << "current chain is " << j << endl;
+      char c = getchar();
 
       if (l >= j)
       {
-        cout << "moving to the right from " << j << " to " << right(j) << endl;
-        j = right(j);
+        // we need to convert to 0-based indexing
+        cout << "moving to the right from " << j << " to " << right(j) - 1 << endl;
+        j = right(j) - 1;
         continue;
       }
 
       if (ri <= j)
       {
-        cout << "moving to the left from " << j << " to " << left(j) << endl;
-        j = left(j);
+        // we need to convert to 0-based indexing
+        cout << "moving to the left from " << j << " to " << left(j) - 1 << endl;
+        j = left(j) - 1;
         continue;
       }
 
@@ -615,34 +660,41 @@ class Solution
                << "inside the edge: " << "from " << chosen_edge.first
                << " to " << chosen_edge.second << endl;
           cout << "in other words, " << checked_point.second << " <= " <<
-              (points_[e.first].second) << " and " << chosen_edge.second <<
+              (points_[e.first].second) << " and " << checked_point.second <<
               " >= " << (points_[e.second].second) << endl;
           break;
         }
 
         cout << "tried to check with edge "<< e.first << "->" << e.second
              << ", moving on to the next one" << endl;
+
+
+        int test;
+        cin >> test;
       }
 
       // now we got the edge, need to check if it is on the left side or the right one
       if (right_from_edge(points_[(chosen_edge.first)],
                           points_[(chosen_edge.second)], checked_point))
       {
-        cout << "the tested points lies to the right side of the chosed edge" << endl;
-        l = Imax[chosen_edge];
-        cout << "new rightmost index is " << l << endl;
+        cout << "the tested point lies to the right side of the chosen edge" << endl;
+        // this is in contrast to the original article, there l was changed in this case, important: i think there is a typo in the original article
+        ri = Imax[chosen_edge];
+        cout << "new rightmost exclusive index is " << ri << endl;
         cout << "region mark update " << region_mark << " -> " <<
-            Rc[chosen_edge] << endl;
+            Lc[chosen_edge] << endl;
+
         region_mark = Rc[chosen_edge];
       }
       else if (left_from_edge(points_[(chosen_edge.first)],
                               points_[(chosen_edge.second)], checked_point))
       {
         cout << "the tested point lies to the left side of the chosed edge" << endl;
-        ri = Imin[chosen_edge];
-        cout << "new rightmost index is " << ri << endl;
+        l = Imin[chosen_edge];
+        cout << "new leftmost exclusive index is " << l << endl;
         cout << "region mark update " << region_mark << " -> " <<
-            Lc[chosen_edge] << endl;
+            Rc[chosen_edge] << endl;
+
         region_mark = Lc[chosen_edge];
       }
       else // else if lies on the edge and we cannot really provide an answer - return
@@ -651,6 +703,10 @@ class Solution
         // for now
         throw std::runtime_error("not implemented");
       }
+
+      int test;
+      cin >> test;
+
     }
 
   }
@@ -666,8 +722,14 @@ int main()
 {
   // std::cout << PSLG_Point_Location::lca(0, 1) << std::endl;
 
-
-  // this is the example from the article; needs to be modified as it it not regular!
+  /*std::cout << "checking that left and right work properly " << std::endl;
+  for (int i = 0; i < 4; ++i)
+  {
+    std::cout << PSLG_Point_Location::left(i) << " " <<
+        PSLG_Point_Location::right(i) << std::endl;
+  }
+  */
+  //this is the example from the article; needs to be modified as it it not regular!
 
   PSLG_Point_Location::Solution s({{1, 1}, {4,2}, {3,4}, {3,3}},
                                   {{2, 3, 1}, {0, 2, 3}, {0, 1, 3}, {0, 1,2}});
