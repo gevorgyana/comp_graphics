@@ -332,29 +332,41 @@ class Solution
      * inside, indices to the sorted structure are stored, filtered thru m[.]
      */
 
-    // debug statement
+    cout << "Checking column lists" << endl;
+
     for (int i = 0; i < cols.size(); ++i)
     {
-      cout << i << " ## " << endl;
+      cout << "Checking the columns of vertex #" << i << endl;
       for (int j = 0; j < cols[i].size(); ++j)
       {
-        cout << cols[i][j] << endl;
+        cout << cols[i][j] << " ";
       }
+      cout << endl;
     }
-    cout << "----" << endl;
+
+    cout << "Checking row lists" << endl;
+
+    for (int i = 0; i < rows.size(); ++i)
+    {
+      cout << "Checking the rows of vertex #" << i << endl;
+      for (int j = 0; j < rows[i].size(); ++j)
+      {
+        cout << rows[i][j] << " ";
+      }
+      cout << endl;
+    }
+
+    cout << "Weight balancing..." << endl;
 
     for (int i = sz - 2; i > 0; --i)
     {
-      cout << "debug statement; iter #" << i << endl;
-
-      int w_out = 0; // sum of weights in row list of v_{i} -- same as
-      // sum of weights of all edges coming down from v_{i}
+      int w_out = 0;
       for (int j = 0; j < rows[i].size(); ++j)
       {
         w_out += e2weight[make_pair(i,rows[i][j])];
       }
 
-      cout << "debug statement; w_out" << w_out << endl;
+      cout << "w_out of vertex " << i << " is " << w_out << endl;
 
       if (w_out > cols[i].size())
       {
@@ -366,12 +378,14 @@ class Solution
       }
     }
 
+    cout << "==============" << endl << endl;
     // second pass and construction of the chain data structure
 
     map<pair<int,int>,int> Imin, Imax, Rc, Lc;
 
     // todo give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
+
     int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
     // outer regions if we take into account current part of the figure
     // limited by 2 chains; initially these point to 0 - 0 is the name
@@ -380,92 +394,100 @@ class Solution
     // r is the index of the regions we are about to mark; we maintain 1 such
     // instance in the inner loop, it is enough
 
-
     // todo document it! A means the distance between the bois, it is needed
     // at the very beginning; checkthe first stpe of the algorithm to see what
     // happens if we set it to 0! it needs to be set to 1 at the very beginning
 
-    // udpte: A is 0 at the very beginning, it is the index os the leftmost edge, so 0-based
+    // udpte: A is 0 at the very beginning, it is the index os the leftmost edge,
+    // so 0-based
 
     /*
       todo fixme
       adding chains to the chain structure fixme hardcoded 10
     */
 
-    // update A will also be responsible for all edge indices!
-    // update A is the index of the current leftmost edge +-? not sure...
+    vector<vector<pair<int,int>>> chains(4, vector<pair<int,int>>());
 
-    vector<vector<pair<int,int>>> chains(10, vector<pair<int,int>>());
-
-    // todo fix the below loop, it can be rewritten more concisely
     int w_in = 0;
     for (int k = 0; k < rows[0].size(); ++k)
     {
       w_in += (e2weight[make_pair(0, rows[0][k])]);
     }
-
     int i = 0;
+    cout << "Processing outcoming from " << i << "; weight is " << w_in << endl;
+
     while (i < sz - 1)
     {
       int w_out = 0;
-
       for (int k = 0; k < rows[i].size(); ++k)
       {
         w_out += (e2weight[make_pair(i, rows[i][k])]);
       }
 
+      cout << "Processing outcoming from " << i << "; weight is " << w_out << endl;
+
       int a = w_in - w_out;
+
+      cout << "a is (=w_in - w_out) " << a << endl;
+
       for (int j = 0; j < rows[i].size(); ++j)
       {
         pair<int,int> e = make_pair(i, rows[i][j]);
         Imin[e] = A;
         Imax[e] = A + a + e2weight[e] - 1;
-        cout << "pred : " << Imin[e] << " " << Imax[e] << ": is given an edge " << "("
-             << e.first << " " << e.second << endl;
+
+        cout << "working with edge " << e.first << " -> " << e.second << endl;
+        cout << "Imin[e] = " << Imin[e] << "; Imax[e] = " << Imax[e] << endl;
 
         // c must be decreased by 1, see the docs for lca
-        int c = lca(Imin[e], Imax[e]);
+        int c = lca(Imin[e], Imax[e]) - 1;
 
         /**
            short reminder:
            the fact Imin(e) is the minimal chain index that contains this edge e;
                     Imax(e) is the maximal one;
 
-           lca(l, r) here means that before we search for chain r, we search for chain l;
-
            1 - 2 - 3 I
            1 - 2 - 4 J
            these are 2 chains
-           it may be confusing tha the parent of I is J, but is is chosed to be this way
-           deliberatey
-
-           indeed, one of them will be missing, todo maybe i need to add both of them as predecessors?
+           it may be confusing tha the parent of I is J, but is is chosed to be
+           this way deliberatey
+           lca(l, r) = l here means that before we search for chain r,
+           we search for chain l;
          */
 
-        cout << "lca checking edge: " << e.first << " and " << e.second << endl;
-        cout << "lca of (is)" << Imin[e] << " and " << Imax[e] << " is " << c - 1 << endl;
-        // assign e to chain c
-        chains[c - 1].push_back(e);
+        cout << "lca of Imin and Imax is " << c << endl;
 
+        // assign e to chain c
+        chains[c].push_back(e);
+
+        // todo not sure that coloring works
         if (j == 0)
         {
+          cout << "to the left of current edge is : " << L << endl;
           Lc[e] = L;
         } else
         {
+          cout << "to the left of current edge if : " << r << endl;
           Lc[e] = r;
           ++r;
         }
+
         if (j == rows[i].size() - 1)
         {
+          cout << "to the right of current edge is " << R << endl;
           Rc[e] = R;
         } else
         {
+          cout << "to the right of current edge is " << r << endl;
           Rc[e] = r;
         }
+
         a = 0;
         A = Imax[e] + 1;
       }
-      ++i; --r;
+      ++i; // --r; important!
+           // this must be a typo in the original article, it breaks things;
 
       w_in = 0;
       for (int k = 0; k < cols[i].size(); ++k)
@@ -473,22 +495,22 @@ class Solution
         w_in += e2weight[make_pair(cols[i][k], i)];
       }
 
-      cout << w_in << endl;
+      cout << "Processing incoming from " << i << "; weight is " << w_in << endl;
 
       pair<int,int> d1 = make_pair(cols[i][0], i);
       R = Rc[d1];
+
       pair<int,int> d2 = make_pair(cols[i][cols[i].size() - 1], i);
-
-      cout << "debug; " << d1.first << " " << d1.second << endl;
-      cout << "debug; " << d2.first << " " << d2.second << endl;
-
       L = Lc[d2];
+
+      cout << "new global left and right colors: L = " << L << " " << " R = " << R
+           << endl;
+
       A = Imin[d2];
     }
 
-    // end of preprocessing
-    // need to test it more extensively, but to thispoints seems correct
-    // working with regions needs testing todo
+    cout << "-------" << endl << endl;
+
     cout<< "Printing the chain structure" << endl;
 
     int vi = 0;
