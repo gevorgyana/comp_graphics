@@ -8,6 +8,10 @@
 #include <cstdio>
 
 /*
+ * todo fix point coloring
+**/
+
+/*
  * todo after refactoring support verbose flags
 **/
 
@@ -65,57 +69,35 @@ int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 {
   cout << "testing left_from_edge with the following parameters" << endl;
   cout << "from " <<  from.first << " " << from.second << " -> " << to.first <<
-      to.second << "against this point : " << checked.first << " " << checked.second <<
-      endl;
+      to.second << "against this point : " << checked.first << " "
+       << checked.second << endl;
 
-  // todo check that it works on all quadrants
-
-  // delta(y) / delta(x)
-
-  // todo fix this barbarian cast magin
+  // todo fix this barbarian cast magic
   double slope = 1.0 * (to.second - from.second) / (to.first - from.first);
-
   cout << "slope " << slope << endl;
-
   // a(y value) = from.y - slope * from.x;
   double a = from.second - slope * from.first;
-
   cout << "a parameter value : "  << a << endl;
-
   int supposed_y = (a + checked.first * slope);
-
   cout << "supposed_y : " << supposed_y << endl;
-
   cout << "stopped left_from_edge" << endl;
-
-
   if (slope > 0)
     return (supposed_y > checked.second);
   return (supposed_y < checked.second);
 }
 
-/************very big todo check direction functions***/
 int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 {
-
   cout << "testing right_from_edge with the following parameters" << endl;
   cout << "from " <<  from.first << " " << from.second << " -> " << to.first <<
-      to.second << "against this point : " << checked.first << " " << checked.second << endl;
-
-  // todo check that it works on all quadrants
-
-  // construct the line passing thru from and to points
-  // then, if we continue moving along this line and stay at x point equal to that of the point
-  // being checked, what is out y value? maybe it is higher, or lower? check and return the result
-  double slope = 1.0 * (to.second - from.second) / (to.first - from.first); // delta(y) / delta(x)
+      to.second << "against this point : " << checked.first << " " <<
+      checked.second << endl;
+  double slope = 1.0 * (to.second - from.second) / (to.first - from.first);
   cout << "slope : " << slope << endl;
-
-  double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x;
+  double a = from.second - slope * from.first; // a(y value) = from.y - slope * from.x
   cout << "beginning point (a parameter): " << a << endl;
-
   int supposed_y = (a + checked.first * slope);
   cout << "supposed_y " << supposed_y << endl;
-
   cout << "finished working with right_from_edge" << endl;
 
   /** here we can also check if they are equal, it means the point is on the line*/
@@ -126,8 +108,8 @@ int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 
 /*
  * move left in the standard heirarchy
- * todo test
 **/
+
 int left(int y)
 {
   // do not forget to convert to 1-based indexing
@@ -135,9 +117,8 @@ int left(int y)
 
   if (y % 2 == 1) // the output is really not well-defined for the bottom row
                   // in the binary tree
-  {
-    return y;
-  }
+  {return y;}
+
   /*
    * in this case,
    *   y
@@ -153,19 +134,16 @@ int left(int y)
 
 /*
  * move right in the standard heirarchy
- * todo test
 **/
+
 int right(int y)
 {
   // convert y to 1-based indexing
   ++y;
 
-
   if (y % 2 == 1) // the output is really not well-defined for the bottom row
                   // in the binary tree
-  {
-    return y;
-  }
+  {return y;}
 
   return y + (y / 2);
 }
@@ -173,9 +151,10 @@ int right(int y)
 /**
  * returns the parent of x in standard search heirarchy
  */
+
 int move(int x)
 {
-  // currently iterated thru p2-th level of the tree
+  // currently iterating thru p2-th level of the tree
   int standard_x = pow(2, p2(x));
   int next_x = standard_x;
   int to_the_right = true;
@@ -192,18 +171,12 @@ int move(int x)
 int lca(int l, int r)
 {
   ++l; ++r; // we can only work with 1-based indices
-  // cout << "survived to this points 1" << endl;
-  // cout << l <<  " " << r << endl;
 
   int p2_ = p2(l);
-
-  // cout << "survived to this point 2" << endl;
-  // cout << p2_ << endl;
 
   while ((l - (pow(2, p2(l)) - 1) > r) || (l + (pow(2, p2(l)) - 1) < r))
     l = move(l);
 
-  // cout << "stopped executing at point 3" << endl;
   return l;
 }
 
@@ -307,8 +280,6 @@ class Solution
       cout << "]" << endl;
     }
 
-    // okay, it has been tested up to this point
-
     // this is generally dangerous to do, but okay here
     auto& pref = points_;
 
@@ -360,7 +331,6 @@ class Solution
      * to sum up, there are 2 vector for each point - edge list and row list,
      * inside, indices to the sorted structure are stored, filtered thru m[.]
      */
-    // phase #1 ended - preprocessing done
 
     // debug statement
     for (int i = 0; i < cols.size(); ++i)
@@ -396,37 +366,34 @@ class Solution
       }
     }
 
-    // tested until this point!
-    // first pass finished
-
-
-    // for (int i = 0; i < rows[0].size(); ++i)
-    // {
-    //   cout << rows[0][i] << " ";
-    // }
-
-    // cout << "-=-=-=-=-" << endl;
+    // second pass and construction of the chain data structure
 
     map<pair<int,int>,int> Imin, Imax, Rc, Lc;
 
     // todo give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
     int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
-    // outer regions if we take into account currnt part of the figure limited by 2 chains; initially these point to 0 - 0 is the name of the outer region out figure lies in
+    // outer regions if we take into account current part of the figure
+    // limited by 2 chains; initially these point to 0 - 0 is the name
+    // of the outer region out figure lies in
 
-    // r is the index of the regions we are about to mark; we maintain 1 such instance in the inner loop, it is enough
+    // r is the index of the regions we are about to mark; we maintain 1 such
+    // instance in the inner loop, it is enough
 
 
-    // todo document it! A means the distance between the bois, it is needed at the very beginning; checkthe first stpe of the algorithm to see what happens if we set it to 0! it needs to be set to 1 at the very beginning
+    // todo document it! A means the distance between the bois, it is needed
+    // at the very beginning; checkthe first stpe of the algorithm to see what
+    // happens if we set it to 0! it needs to be set to 1 at the very beginning
 
-    // udpte: A si 0 at the very beginning, it is the index os the leftmost edge, so 0-based
+    // udpte: A is 0 at the very beginning, it is the index os the leftmost edge, so 0-based
 
     /*
+      todo fixme
       adding chains to the chain structure fixme hardcoded 10
-    **/
+    */
 
     // update A will also be responsible for all edge indices!
-    // update A is the index of the current leftmost edge +-?
+    // update A is the index of the current leftmost edge +-? not sure...
 
     vector<vector<pair<int,int>>> chains(10, vector<pair<int,int>>());
 
@@ -456,9 +423,7 @@ class Solution
         cout << "pred : " << Imin[e] << " " << Imax[e] << ": is given an edge " << "("
              << e.first << " " << e.second << endl;
 
-        // --- +- experimental
-
-        // c must be decreased by 1, see the docs fir lca
+        // c must be decreased by 1, see the docs for lca
         int c = lca(Imin[e], Imax[e]);
 
         /**
@@ -479,7 +444,7 @@ class Solution
 
         cout << "lca checking edge: " << e.first << " and " << e.second << endl;
         cout << "lca of (is)" << Imin[e] << " and " << Imax[e] << " is " << c - 1 << endl;
-        // link(c, e); // assign e to chain c
+        // assign e to chain c
         chains[c - 1].push_back(e);
 
         if (j == 0)
@@ -523,6 +488,7 @@ class Solution
 
     // end of preprocessing
     // need to test it more extensively, but to thispoints seems correct
+    // working with regions needs testing todo
     cout<< "Printing the chain structure" << endl;
 
     int vi = 0;
@@ -553,16 +519,10 @@ class Solution
 
      */
 
-    /*
-     * large todo - need to check how it works
-    **/
-
     cout << "chain tree has been constructed; searching now..." << endl;
-    // large todo make this double-based, now the code works with integers only
-    pair<int,int> checked_point(1, 2);
 
-    // filter the point according to its height todo
-    // check that the point indeed lies in between the max and min y-coords
+    // large todo make this double-based, now the code works with integers only
+    pair<int,int> checked_point(3, 2);
 
     // todo fix magic numbers
     int min_y_coord = 100,
@@ -591,9 +551,7 @@ class Solution
       cout << "the given point lies outside of the planar straight line graph" <<
           endl;
 
-    // todo the tree that is constructed stores more slots than
-    // needed now(hardcoded 10); fix that;
-
+    // todo
     int j = 3; // this is hardcoded for now; but later will be assigned to
                // get_root_chain(max_chain_index); actually this
                // function needs only the the number of
@@ -616,11 +574,10 @@ class Solution
     while (l + 1 != ri)
     {
       cout << "current chain is " << j << endl;
-      char c = getchar();
 
       if (l >= j)
       {
-        // we need to convert to 0-based indexing
+        // convert to 0-based indexing
         cout << "moving to the right from " << j << " to " << right(j) - 1 << endl;
         j = right(j) - 1;
         continue;
@@ -628,7 +585,7 @@ class Solution
 
       if (ri <= j)
       {
-        // we need to convert to 0-based indexing
+        // convert to 0-based indexing
         cout << "moving to the left from " << j << " to " << left(j) - 1 << endl;
         j = left(j) - 1;
         continue;
@@ -667,10 +624,6 @@ class Solution
 
         cout << "tried to check with edge "<< e.first << "->" << e.second
              << ", moving on to the next one" << endl;
-
-
-        int test;
-        cin >> test;
       }
 
       // now we got the edge, need to check if it is on the left side or the right one
@@ -678,11 +631,12 @@ class Solution
                           points_[(chosen_edge.second)], checked_point))
       {
         cout << "the tested point lies to the right side of the chosen edge" << endl;
-        // this is in contrast to the original article, there l was changed in this case, important: i think there is a typo in the original article
+        // this is in contrast to the original article, l and ri are swapped,
+        // important: i think there is a typo in the original article
         ri = Imax[chosen_edge];
         cout << "new rightmost exclusive index is " << ri << endl;
-        cout << "region mark update " << region_mark << " -> " <<
-            Lc[chosen_edge] << endl;
+        cout << "region mark update " << region_mark << " -> "
+             << Rc[chosen_edge] << endl;
 
         region_mark = Rc[chosen_edge];
       }
@@ -693,7 +647,7 @@ class Solution
         l = Imin[chosen_edge];
         cout << "new leftmost exclusive index is " << l << endl;
         cout << "region mark update " << region_mark << " -> " <<
-            Rc[chosen_edge] << endl;
+            Lc[chosen_edge] << endl;
 
         region_mark = Lc[chosen_edge];
       }
@@ -703,9 +657,6 @@ class Solution
         // for now
         throw std::runtime_error("not implemented");
       }
-
-      int test;
-      cin >> test;
 
     }
 
