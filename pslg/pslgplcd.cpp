@@ -8,10 +8,6 @@
 #include <cstdio>
 
 /*
- * todo fix point coloring
-**/
-
-/*
  * todo after refactoring support verbose flags
 **/
 
@@ -82,8 +78,8 @@ int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
   cout << "supposed_y : " << supposed_y << endl;
   cout << "stopped left_from_edge" << endl;
   if (slope > 0)
-    return (supposed_y > checked.second);
-  return (supposed_y < checked.second);
+    return (supposed_y < checked.second);
+  return (supposed_y > checked.second);
 }
 
 int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
@@ -102,8 +98,8 @@ int right_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
 
   /** here we can also check if they are equal, it means the point is on the line*/
   if (slope > 0)
-    return (supposed_y < checked.second);
-  return (supposed_y > checked.second);
+    return (supposed_y > checked.second);
+  return (supposed_y < checked.second);
 }
 
 /*
@@ -648,15 +644,20 @@ class Solution
              << ", moving on to the next one" << endl;
       }
 
+      // document what it means to be to the right side from the ende in the code
+      // above, as it may be confusing to comprehend it now
+
       // now we got the edge, need to check if it is on the left side or the right one
       if (right_from_edge(points_[(chosen_edge.first)],
                           points_[(chosen_edge.second)], checked_point))
       {
-        cout << "the tested point lies to the right side of the chosen edge" << endl;
-        // this is in contrast to the original article, l and ri are swapped,
-        // important: i think there is a typo in the original article
-        ri = Imax[chosen_edge];
-        cout << "new rightmost exclusive index is " << ri << endl;
+        cout << "the tested point lies to the left side from the chosen edge"
+             << " (in terms of directed vector), but to the right side from it"
+             << " if we suppose it is in front of our eyes and disregard its"
+             << " direction;" << endl;
+
+        l = Imin[chosen_edge];
+        cout << "new leftmost exclusive index is " << l << endl;
         cout << "region mark update " << region_mark << " -> "
              << Rc[chosen_edge] << endl;
 
@@ -665,9 +666,15 @@ class Solution
       else if (left_from_edge(points_[(chosen_edge.first)],
                               points_[(chosen_edge.second)], checked_point))
       {
-        cout << "the tested point lies to the left side of the chosed edge" << endl;
-        l = Imin[chosen_edge];
-        cout << "new leftmost exclusive index is " << l << endl;
+        cout << "the tested point lies to the right side from the chosen edge"
+             << " (in terms of directed vector), but to the left side from it"
+             << " if we suppose it is in front of our eyes"
+             << "and disregard its direction;" << endl;
+        // this is in contrast to the original article, l and ri are swapped,
+        // important: i think there is a typo in the original article
+
+        ri = Imax[chosen_edge];
+        cout << "new rightmost exclusive index is " << ri << endl;
         cout << "region mark update " << region_mark << " -> " <<
             Lc[chosen_edge] << endl;
 
