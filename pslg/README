@@ -1,0 +1,3 @@
+This is a an implementstion of planar straight line point location
+algorithm using chain decomposition; for reference, see this paper;
+the code is implementation of the algorithm described there;

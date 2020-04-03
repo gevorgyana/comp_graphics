@@ -1,0 +1,11 @@
+ * TODO after refactoring support verbose flags
+ * TODO regularization will bring even more complexity, first finish other todos
+ * TODO fix cast magic
+ * TODO review documentation, it is obscure and not clear
+ * TODO refactor the one character names
+ * TODO FIXME hardcoded the amount of chains in vector
+ * ??? TODO not sure that coloring works - not valid, but still in the source here for some reason...
+ * TODO make this double-based, now the code works with integers only
+ * ??? TODO more specific? review the code: fix magic numbers
+ * TODO get the code out of the constructor - it does not belong here...
+ * ??? TODO what does it mean? rename these; these two are responsible for binary search process;

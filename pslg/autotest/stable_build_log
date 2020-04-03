@@ -1,0 +1,177 @@
+PSLG Point Location with Chain Decomposition Solution object has been invoked
+Initial data...
+--- point number as per input | coords (x) | coords(y) ---
+0 1 1
+1 4 2
+2 3 4
+3 3 3
+--- edges : index -> [indices] ---
+0  :2  :3  :1 
+1  :0  :2  :3 
+2  :0  :1  :3 
+3  :0  :1  :2 
+the new array: 
+3 4 | 3 3 | 4 2 | 1 1 | 
+the conversion looks like: 
+3 2 0 1 
+correct edges...
+from 3 (old 0) to []
+from 2 (old 1) to [3 (old 0) ]
+from 0 (old 2) to [3 (old 0) 2 (old 1) 0 (old 2) ]
+from 1 (old 3) to [3 (old 0) 2 (old 1) ]
+Checking column lists
+Checking the columns of vertex #0
+
+Checking the columns of vertex #1
+0 
+Checking the columns of vertex #2
+0 1 
+Checking the columns of vertex #3
+2 0 1 
+Checking row lists
+Checking the rows of vertex #0
+3 1 2 
+Checking the rows of vertex #1
+3 2 
+Checking the rows of vertex #2
+3 
+Checking the rows of vertex #3
+
+Weight balancing...
+w_out of vertex 2 is 1
+w_out of vertex 1 is 2
+debug statement; w_out > cols[i].size()
+debug statement; cols[.].size() = 1
+before processing the weight of edge i <- cols[.][0] = 1
+after processing the weight of edge i <- cols[.][0] = 2
+==============
+
+Processing outcoming from 0; weight is 4
+Processing outcoming from 0; weight is 4
+a is (=w_in - w_out) 0
+working with edge 0 -> 3
+Imin[e] = 0; Imax[e] = 0
+lca of Imin and Imax is 0
+to the left of current edge is : 0
+to the right of current edge is 1
+working with edge 0 -> 1
+Imin[e] = 1; Imax[e] = 2
+lca of Imin and Imax is 1
+to the left of current edge if : 1
+to the right of current edge is 2
+working with edge 0 -> 2
+Imin[e] = 3; Imax[e] = 3
+lca of Imin and Imax is 3
+to the left of current edge if : 2
+to the right of current edge is 0
+Processing incoming from 1; weight is 2
+new global left and right colors: L = 1  R = 2
+Processing outcoming from 1; weight is 2
+a is (=w_in - w_out) 0
+working with edge 1 -> 3
+Imin[e] = 1; Imax[e] = 1
+lca of Imin and Imax is 1
+to the left of current edge is : 1
+to the right of current edge is 3
+working with edge 1 -> 2
+Imin[e] = 2; Imax[e] = 2
+lca of Imin and Imax is 2
+to the left of current edge if : 3
+to the right of current edge is 2
+Processing incoming from 2; weight is 2
+new global left and right colors: L = 3  R = 0
+Processing outcoming from 2; weight is 1
+a is (=w_in - w_out) 1
+working with edge 2 -> 3
+Imin[e] = 2; Imax[e] = 3
+1
+lca of Imin and Imax is 3
+to the left of current edge is : 3
+to the right of current edge is 0
+Processing incoming from 3; weight is 3
+new global left and right colors: L = 1  R = 0
+-------
+
+Printing the chain structure
+Chain number 0 is consituted by the following edges
+0->3
+
+Chain number 1 is consituted by the following edges
+0->1
+1->3
+
+Chain number 2 is consituted by the following edges
+1->2
+
+Chain number 3 is consituted by the following edges
+0->2
+2->3
+
+chain tree has been constructed; searching now...
+min coord (y) is 1
+max coord (y) is 4
+current chain is 3
+checking in this chain : 
+0 -> 2 (indices to vetices)
+2 -> 3 (indices to vetices)
+checking if the checked point lies between this edge: 0 -> 2
+the checked_point's y value:  2 lies inside the edge: from 0 to 2
+in other words, 2 <= 4 and 2 >= 2
+testing right_from_edge with the following parameters
+from 3 4 -> 42against this point : 3 2
+slope : -2
+beginning point (a parameter): 10
+supposed_y 4
+finished working with right_from_edge
+testing left_from_edge with the following parameters
+from 3 4 -> 42against this point : 3 2
+slope -2
+a parameter value : 10
+supposed_y : 4
+stopped left_from_edge
+the tested point lies to the right side from the chosen edge (in terms of directed vector), but to the left side from it if we suppose it is in front of our eyesand disregard its direction;
+new rightmost exclusive index is 3
+region mark update 0 -> 2
+current chain is 3
+moving to the left from 3 to 1
+current chain is 1
+checking in this chain : 
+0 -> 1 (indices to vetices)
+1 -> 3 (indices to vetices)
+checking if the checked point lies between this edge: 0 -> 1
+tried to check with edge 0->1, moving on to the next one
+checking if the checked point lies between this edge: 1 -> 3
+the checked_point's y value:  2 lies inside the edge: from 1 to 3
+in other words, 2 <= 3 and 2 >= 1
+testing right_from_edge with the following parameters
+from 3 3 -> 11against this point : 3 2
+slope : 1
+beginning point (a parameter): 0
+supposed_y 3
+finished working with right_from_edge
+the tested point lies to the left side from the chosen edge (in terms of directed vector), but to the right side from it if we suppose it is in front of our eyes and disregard its direction;
+new leftmost exclusive index is 1
+region mark update 2 -> 3
+current chain is 1
+moving to the right from 1 to 2
+current chain is 2
+checking in this chain : 
+1 -> 2 (indices to vetices)
+checking if the checked point lies between this edge: 1 -> 2
+the checked_point's y value:  2 lies inside the edge: from 1 to 2
+in other words, 2 <= 3 and 2 >= 2
+testing right_from_edge with the following parameters
+from 3 3 -> 42against this point : 3 2
+slope : -1
+beginning point (a parameter): 6
+supposed_y 3
+finished working with right_from_edge
+testing left_from_edge with the following parameters
+from 3 3 -> 42against this point : 3 2
+slope -1
+a parameter value : 6
+supposed_y : 3
+stopped left_from_edge
+the tested point lies to the right side from the chosen edge (in terms of directed vector), but to the left side from it if we suppose it is in front of our eyesand disregard its direction;
+new rightmost exclusive index is 2
+region mark update 3 -> 3

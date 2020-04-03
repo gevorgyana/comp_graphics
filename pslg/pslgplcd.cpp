@@ -8,11 +8,8 @@
 #include <cstdio>
 
 /*
- * todo after refactoring support verbose flags
-**/
-
-/**
-todo regularization, but it will bring even more complexity, first finish with a regular graph
+ * TODO after refactoring support verbose flags
+ * TODO regularization will bring even more complexity, first finish other todos
  */
 
 namespace PSLG_Point_Location {
@@ -43,7 +40,7 @@ using namespace std;
 
  */
 
-// find the max power of 2 in @x
+// find the max power of 2 in x
 int p2(int x)
 {
   int p = 0;
@@ -58,7 +55,7 @@ int p2(int x)
 
 /**
  * as all the edges are directed to the bottom, the following functions work properly:
- * left_from_edge and right_from_egde
+ * left_from_edge() and right_from_egde()
  */
 
 int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
@@ -68,7 +65,7 @@ int left_from_edge(pair<int,int> from, pair<int,int> to, pair<int,int> checked)
       to.second << "against this point : " << checked.first << " "
        << checked.second << endl;
 
-  // todo fix this barbarian cast magic
+  // TODO fix this barbarian cast magic
   double slope = 1.0 * (to.second - from.second) / (to.first - from.first);
   cout << "slope " << slope << endl;
   // a(y value) = from.y - slope * from.x;
@@ -183,7 +180,7 @@ class Solution
   {
     cout << "PSLG Point Location with Chain Decomposition Solution object has been invoked" << endl;
     cout << "Initial data..." << endl;
-    cout << "--- point # | coords (x) | coords(y) ---" << endl;
+    cout << "--- point number as per input | coords (x) | coords(y) ---" << endl;
     for (int i = 0; i < points.size(); ++i)
     {
       cout << i << " ";
@@ -205,19 +202,22 @@ class Solution
     edges_ = edges;
     int sz = points_.size();
 
-    // cannot use unordered map with pair - try to compile and see why
+    /* cannot use unordered map with pair
+     * pair is not hashed by means of pure standard library */
+
     map<pair<double,double>,int> p;
     for (int i = 0; i < sz; ++i)
     {
       p[points_[i]] = i;
     }
 
-    // we will keep both the sorted array and the index map for future
-    // reference (we will need to convert edge indices)
+    /* we will keep both the sorted array and the index map to
+     * convert between edge indices
+     * as we may reorder them */
 
     for (int i = 0; i < sz; ++i)
     {
-      // find the ith smallest elements from the array
+      // find the i-th smallest elements from the array
       int max_element_index = i;
       for (int j = i + 1; j < sz; ++j)
       {
@@ -226,7 +226,6 @@ class Solution
           max_element_index = j;
         }
       }
-
       iter_swap(points_.begin() + i, points_.begin() + max_element_index);
     }
 
@@ -236,13 +235,11 @@ class Solution
       cout << i.first << " " << i.second << " | ";
     }
     cout << endl;
-
     vector<int> m(sz);
     for (int i = 0; i < sz; ++i)
     {
       m[p[points_[i]]] = i;
     }
-
     cout << "the conversion looks like: " << endl;
     for (int i = 0; i < sz; ++i)
     {
@@ -284,9 +281,6 @@ class Solution
       sort(rows[i].begin(), rows[i].end(), [i, pref](int n, int m) {
           double atan2n = atan2(pref[n].first - pref[i].first, pref[n].second - pref[i].second),
               atan2m = atan2(pref[m].first - pref[i].first, pref[m].second - pref[i].second);
-
-          //experimental
-          //return atan2n < atan2m;
           return pref[n].first < pref[m].first;
         });
     }
@@ -296,14 +290,14 @@ class Solution
       sort(cols[i].begin(), cols[i].end(), [i, pref](int n, int m) {
           double atan2n = atan2(pref[i].first - pref[n].first, pref[i].second - pref[n].second),
               atan2m = atan2(pref[i].first - pref[m].first, pref[i].second - pref[m].second);
-
-          // experimental
-          // return atan2n > atan2m;
           return pref[n].first > pref[m].first;
         });
     }
 
     /**
+     * TODO review this, it is obscure and not clear, most
+     * probably a reader is not able to understant what is written below
+
      * in the original article, the following structure is given
      * for the edge and point vertex format:
 
@@ -325,8 +319,10 @@ class Solution
      * next ptrs are indices too, they are need fortraversing only;
 
      * to sum up, there are 2 vector for each point - edge list and row list,
-     * inside, indices to the sorted structure are stored, filtered thru m[.]
-     */
+     * inside, indices to the sorted structure are stored, filtered thru m[.] */
+
+    // the following info is used for debug purposes
+    // to show the internals of the algorithm
 
     cout << "Checking column lists" << endl;
 
@@ -375,22 +371,25 @@ class Solution
     }
 
     cout << "==============" << endl << endl;
-    // second pass and construction of the chain data structure
+
+    // second pass (as per the article) and construction of the chain data structure
 
     map<pair<int,int>,int> Imin, Imax, Rc, Lc;
 
-    // todo give these boys more meaningful names, but it is easier to
+    // TODO give these boys more meaningful names, but it is easier to
     // follow the original naming convention from the article with them now
 
-    int A = 0, r = 1, L = 0, R = 0; // L and R are for marking the
+    // L and R are for marking the
     // outer regions if we take into account current part of the figure
     // limited by 2 chains; initially these point to 0 - 0 is the name
     // of the outer region out figure lies in
 
+    int A = 0, r = 1, L = 0, R = 0;
+
     // r is the index of the regions we are about to mark; we maintain 1 such
     // instance in the inner loop, it is enough
 
-    // todo document it! A means the distance between the bois, it is needed
+    // TODO document it! A means the distance between the bois, it is needed
     // at the very beginning; checkthe first stpe of the algorithm to see what
     // happens if we set it to 0! it needs to be set to 1 at the very beginning
 
@@ -398,8 +397,9 @@ class Solution
     // so 0-based
 
     /*
-      todo fixme
-      adding chains to the chain structure fixme hardcoded 10
+      TODO FIXME HARDCODED!
+      chain number is hardcoded to 4;
+      if you have more/less chains, print it in the vector size parameter
     */
 
     vector<vector<pair<int,int>>> chains(4, vector<pair<int,int>>());
@@ -457,7 +457,9 @@ class Solution
         // assign e to chain c
         chains[c].push_back(e);
 
-        // todo not sure that coloring works
+        // TODO not sure that coloring works - I have checked everything, maybe
+        // forgot to delete this comment
+
         if (j == 0)
         {
           cout << "to the left of current edge is : " << L << endl;
@@ -482,8 +484,8 @@ class Solution
         a = 0;
         A = Imax[e] + 1;
       }
-      ++i; // --r; important!
-           // this must be a typo in the original article, it breaks things;
+      ++i; /* --r; IMPORTANT!
+            * this must be a typo in the original article, it breaks things; */
 
       w_in = 0;
       for (int k = 0; k < cols[i].size(); ++k)
@@ -539,10 +541,11 @@ class Solution
 
     cout << "chain tree has been constructed; searching now..." << endl;
 
-    // large todo make this double-based, now the code works with integers only
+    // large TODO make this double-based, now the code works with integers only
+
     pair<int,int> checked_point(3, 2);
 
-    // todo fix magic numbers
+    // TODO fix magic numbers
     int min_y_coord = 100,
         max_y_coord = -100;
 
@@ -562,14 +565,14 @@ class Solution
     cout << "min coord (y) is " << min_y_coord << endl;
     cout << "max coord (y) is " << max_y_coord << endl;
 
-    // large todo move this out of the constructor - this code does not belong here...
+    // large TODO move this out of the constructor - this code does not belong here...
 
     // think about the non-strict check...
     if (checked_point.second <= min_y_coord | checked_point.second >= max_y_coord)
       cout << "the given point lies outside of the planar straight line graph" <<
           endl;
 
-    // todo
+    // TODO
     int j = 3; // this is hardcoded for now; but later will be assigned to
                // get_root_chain(max_chain_index); actually this
                // function needs only the the number of
@@ -581,7 +584,7 @@ class Solution
     // need to think about it
     int mi = 4; // this is the number of chains(1 + the index of the last one!)
 
-    // todo rename these; these two are responsible for binary search process;
+    // TODO rename these; these two are responsible for binary search process;
     // they are the left and right boundary chains currently considered respectively
     int l = -1;  // first chain's index - 1;
     int ri = mi; // last index + 1 really
@@ -686,12 +689,8 @@ class Solution
         // for now
         throw std::runtime_error("not implemented");
       }
-
     }
-
   }
-
-
  private:
   vector<pair<double,double>> points_;
   vector<vector<int>> edges_;
