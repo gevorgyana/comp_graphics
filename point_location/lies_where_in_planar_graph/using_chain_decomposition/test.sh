@@ -1,9 +1,7 @@
 #!/bin/sh
 # quick check with log output
 
-make all;
-
-./build/out > ./autotest/current_build_log;
+./build/application > ./autotest/current_build_log;
 
 diff ./autotest/stable_build_log ./autotest/current_build_log > ./autotest/build_diff;
 
@@ -13,5 +11,4 @@ else
       echo "stable build seems to have the same log output, but you have better implement a better test"
 fi
 
-# clean
-rm ./build/out ./autotest/current_build_log ./autotest/build_diff;
+rm ./build/application ./autotest/current_build_log ./autotest/build_diff;
