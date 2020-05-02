@@ -4,8 +4,8 @@ SRC_DIR:=./src
 TEST_DIR:=./tests
 BUILD_DIR:=./build
 
-TEST_SOURCES=${TEST_DIR}/*.cpp
-APP_SOURCES=${SRC_DIR}/*.cpp
+TEST_SOURCES=${wildcard ${TEST_DIR}/*.cpp}
+APP_SOURCES=${wildcard ${SRC_DIR}/*.cpp}
 
 CC:=clang++
 CFLAGS:=
