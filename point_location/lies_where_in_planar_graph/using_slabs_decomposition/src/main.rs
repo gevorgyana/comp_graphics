@@ -1,174 +1,64 @@
-use slice_group_by::GroupBy;
-use std::collections::BTreeSet;
-use std::collections::HashSet;
 use geo::{Line, Coordinate};
 
-// this module hides some of the not essential implementation
-// details related to Rust; they are not necessary to undersant
-// the algorithm.
 mod library_types;
 
-/**
- * this structure contains the slabs
- * and I define searching methods on it
- * later in this code
- */
-
-#[allow(unused)]
-struct SearchStructure <'a> {
-    slabs : Option<Vec<Line<i32>>>,
-    levels : &'a [(i32, i32)],
-    unvisited : Option<HashSet<(i32, i32)>>,
-    visited : Option<HashSet<(i32, i32)>>,
-    intermediate : Option<BTreeSet<library_types::CompLine>>,
-}
-
-impl<'a> Default for SearchStructure <'a> {
-    fn default() -> Self {
-        Self {
-            levels : &[],
-            slabs : None,
-            unvisited : None,
-            visited : None,
-            intermediate : None
-        }
-    }
-}
-
-/**
- * - constructs a full polygon from
- * the given points
- * - works with integers
- * - immutable as this routine does not
- * change the slices
- */
-
-#[allow(unused)]
-impl<'a> SearchStructure <'a> {
+impl library_types::SearchStructure {
     /**
-     * for earch point; for each line going from it upwards (for each
-     * element that has not yet been covered (it is not in the
-     * HashSet)), draw a line to it and see at which level the upper
-     * point is located (say l2);
-     * for every level that has been crossed, (l1 < l <= l2)
-     * having the equation x(y) for this segment by 2 points,
-     * add this segment (ly, x(ly)) to the array that is
-     * located at each level
-     * and then sort the array, there is no need for a tree;
+     * For each line going from it upwards that has not yet
+     * been covered, draw a line to it. The upper point of
+     * each line is located at, say, l2, and the lower point is
+     * at l1. For every level that has been crossed, (l1 < l <= l2)
+     * segment (l, x(l)) is used for locating the test point,
+     * where l is the level's y-value, and x(l) is given by the
+     * equation of the line that goes through the two points of the
+     * selected line.
      *
-     * 2 options;
-     * - get the tree; at each level, add items to the tree (current
-     * tree), and remove all that end at this level; then collect
-     * the slabs by iterating over the tree; the obtained
-     * sequence is guaranteed to be what u need;
-     *
-     * - second option is doing like this; for each item that u
-     * process at some level, shoot all the rays coming up from
-     * this point and then for each level that is crossed,
-     * add it to the array; in fact, you would be spending a lot
-     * of time ( which would be proportional to n^2 ) by doing do
-     * just because of the fact that you would need to manually
-     * process every slab (that would be wasteful)
-     *
-     * first option is better;
-     *
-     * also need to get the tree that would sort these segments;
-     * a tree that would sort implicityly the segments by
-     * insert/remove operations; then u would iterate the tree
-     * and collect the segments in the right order;
-     *
-     * here is the problem; if unwrap sees None, it
-     * panicks; of course it will. handle that? yes;
-     *
-     * the slabs should be allocated in advance;
      * ```
-     *       b
-     *  -----+-----| level 3
-     *     a |     |
-     *  ---+-------| level 2
+     *
+     *  -----b-----| level 3
+     *       |     |
+     *  ---a-------| level 2
      *      \|     |
-     *  -----+-----| level 1
-     *       c     |
+     *  -----c-----| level 1
      *
      * [level 1] -> add line(c, a), line(c, b)
      * [level 2] -> remove line(c, a)
      * [level 3] -> remove line(c, b)
      * ```
+     * ```
+     * b------ level 3
+     * |
+     *'b c     level 2
+     * |/
+     * a------ level 1
+     * ```
+     * In this picture, line ab should be added when we process level 1,
+     * and removed when we process level 3 (note: not on level 2, though
+     * at level 2 line a'b still exists, where 'b is the intersection of
+     * level 2 and ab.
+     *
+     * The level contains the indices of all the lines in data
+     * that start from the y-level that is being currently processed
+     * one of the ideas is to accept the line from input and
+     * not shorten it when we are processing multiple levels
+     * like this;
      */
 
-    fn accept_next_level (&mut self, level: &[(i32, i32)]) {
-        let level_y : i32  = level[0].0;
+    fn accept_next_level (&mut self, level: &mut[usize]) {
+        for index in level.iter() {
 
-        for point in level.iter() {
-            // maintain the visited/unvisited sets
-            self.unvisited.as_mut().unwrap().remove(point);
-            self.visited.as_mut().unwrap().insert(*point);
-
-            // maintain the lines above the current level
-            for above_point in self.unvisited.as_ref().unwrap() {
-                let new_verical_delimiter = Line::<f64> {
-                    start :
-                    Coordinate::<f64> { x : point.0.into(),
-                                        y : point.1.into()},
-                    end :
-                    Coordinate::<f64> { x : above_point.0.into(),
-                                        y : above_point.1.into() }
-                };
-
-                let converted_line = library_types::CompLine { val : new_verical_delimiter };
-
-                self.intermediate.as_mut().unwrap().
-                    insert(converted_line);
-            }
-
-            for below_point in self.visited.as_ref().unwrap() {
-                let new_verical_delimiter = Line::<f64> {
-                    start :
-                    Coordinate::<f64> { x : point.0.into(),
-                                        y : point.1.into()},
-                    end :
-                    Coordinate::<f64> { x : below_point.0.into(),
-                                        y : below_point.1.into() }
-                };
-                let converted_line = library_types::CompLine { val : new_verical_delimiter };
-                self.intermediate.as_mut().unwrap().
-                    remove(&converted_line);
-            }
         }
-
-        // take snapshot of the data; add the lines that are currently
-        // in 'intermediate' into the current slab.
-        /*for i in self.intermediate.unwrap().iter() {
-            self.slabs.insert(i);
-        }*/
     }
 }
 
-/**
- * mutable as this routine needs to
- * sort the slices
- */
-
 #[allow(unused)]
-fn preprocess(points : &mut [(i32, i32)]) {
-    // allocate search structure
-    let mut search_structure = SearchStructure{..Default::default()};
-    // todo fill the unvisited keys
-    // and leave the visited keys in their default state (empty);
-    // insert the option with unvisited keys (hash map) here.
-    // if u rely on defualts here, the functoin will panic.
-
-    // sort by y-coordinate
-    points.sort_by_key(|k| k.1);
-    // form groups where the y-value is the same
-    let mut iter = points.linear_group_by(|a, b| a.1 == b.1);
-    // register points level by level
-    for group in iter {
-        search_structure.accept_next_level(group);
-    }
+fn preprocess(points : &mut Vec<Coordinate<f64>>) {
+    let mut search_structure =
+        library_types::SearchStructure{..Default::default()};
+    search_structure.accept_next_level(&mut[0]);
 }
 
 fn main() {
-    let mut vec = vec![(1, 2), (1, 2), (2, 3)];
+    let mut vec = vec![Coordinate {x : 1.0, y : 2.0}];
     preprocess(&mut vec);
 }
