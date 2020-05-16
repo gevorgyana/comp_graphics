@@ -2,12 +2,11 @@ use slice_group_by::GroupBy;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
 use geo::{Line, Coordinate};
-// mod library_types; // need this to define that
-// the contents of the file types.rs is
-// a module.
 
+// this module hides some of the not essential implementation
+// details related to Rust; they are not necessary to undersant
+// the algorithm.
 mod library_types;
-//use library_types;
 
 /**
  * this structure contains the slabs
@@ -17,23 +16,18 @@ mod library_types;
 
 #[allow(unused)]
 struct SearchStructure <'a> {
-    // slabs are slices of lines
-    slabs : &'a [Line<i32>],
-    // levels are slices of tuples
+    slabs : Option<Vec<Line<i32>>>,
     levels : &'a [(i32, i32)],
-    // stores the points that are yet to
-    // be visited;
     unvisited : Option<HashSet<(i32, i32)>>,
-    // this thing is required by the algorithm
-    intermediate : Option<BTreeSet<library_types::CompLine>>,
     visited : Option<HashSet<(i32, i32)>>,
+    intermediate : Option<BTreeSet<library_types::CompLine>>,
 }
 
 impl<'a> Default for SearchStructure <'a> {
     fn default() -> Self {
         Self {
-            slabs : &[],
             levels : &[],
+            slabs : None,
             unvisited : None,
             visited : None,
             intermediate : None
@@ -142,11 +136,10 @@ impl<'a> SearchStructure <'a> {
             }
         }
 
-        // take snapshot of the data; add the array of data to the
-        // last slice; need to make the slice 2 dimensional or use
-        // vectors;
+        // take snapshot of the data; add the lines that are currently
+        // in 'intermediate' into the current slab.
         /*for i in self.intermediate.unwrap().iter() {
-            slabs.
+            self.slabs.insert(i);
         }*/
     }
 }
