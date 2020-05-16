@@ -2,36 +2,12 @@ use slice_group_by::GroupBy;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
 use geo::{Line, Coordinate};
-use std::cmp::Ordering::{self, Less, Greater};
+// mod library_types; // need this to define that
+// the contents of the file types.rs is
+// a module.
 
-struct CompLine {
-    val : Line<f64>,
-}
-
-impl Ord for CompLine {
-    fn cmp(&self, other : &Self) -> Ordering {
-        if self.val.start.x < other.val.start.x
-        {Less}
-        else {Greater}
-    }
-}
-
-// delegates to Ord
-impl PartialOrd for CompLine {
-    fn partial_cmp(&self, other : &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-// this can be empty
-impl Eq for CompLine {}
-
-// this needs to be done for some reasno
-impl PartialEq for CompLine {
-    fn eq(&self, other : &Self) -> bool {
-        self.val.start.x == other.val.start.x
-    }
-}
+mod library_types;
+//use library_types;
 
 /**
  * this structure contains the slabs
@@ -49,7 +25,7 @@ struct SearchStructure <'a> {
     // be visited;
     unvisited : Option<HashSet<(i32, i32)>>,
     // this thing is required by the algorithm
-    intermediate : Option<BTreeSet<CompLine>>,
+    intermediate : Option<BTreeSet<library_types::CompLine>>,
     visited : Option<HashSet<(i32, i32)>>,
 }
 
@@ -75,43 +51,43 @@ impl<'a> Default for SearchStructure <'a> {
 
 #[allow(unused)]
 impl<'a> SearchStructure <'a> {
-    // for earch point; for each line going from it upwards (for each
-    // element that has not yet been covered (it is not in the
-    // HashSet)), draw a line to it and see at which level the upper
-    // point is located (say l2);
-    // for every level that has been crossed, (l1 < l <= l2)
-    // having the equation x(y) for this segment by 2 points,
-    // add this segment (ly, x(ly)) to the array that is
-    // located at each level
-    // and then sort the array, there is no need for a tree;
-
-    // 2 options;
-    // - get the tree; at each level, add items to the tree (current
-    // tree), and remove all that end at this level; then collect
-    // the slabs by iterating over the tree; the obtained
-    // sequence is guaranteed to be what u need;
-
-    // - second option is doing like this; for each item that u
-    // process at some level, shoot all the rays coming up from
-    // this point and then for each level that is crossed,
-    // add it to the array; in fact, you would be spending a lot
-    // of time ( which would be proportional to n^2 ) by doing do
-    // just because of the fact that you would need to manually
-    // process every slab (that would be wasteful)
-
-    // first option is better;
-
-    // also need to get the tree that would sort these segments;
-    // a tree that would sort implicityly the segments by
-    // insert/remove operations; then u would iterate the tree
-    // and collect the segments in the right order;
-
-    // here is the problem; if unwrap sees None, it
-    // panicks; of course it will. handle that? yes;
-
-    // the slabs should be allocated in advance;
-
     /**
+     * for earch point; for each line going from it upwards (for each
+     * element that has not yet been covered (it is not in the
+     * HashSet)), draw a line to it and see at which level the upper
+     * point is located (say l2);
+     * for every level that has been crossed, (l1 < l <= l2)
+     * having the equation x(y) for this segment by 2 points,
+     * add this segment (ly, x(ly)) to the array that is
+     * located at each level
+     * and then sort the array, there is no need for a tree;
+     *
+     * 2 options;
+     * - get the tree; at each level, add items to the tree (current
+     * tree), and remove all that end at this level; then collect
+     * the slabs by iterating over the tree; the obtained
+     * sequence is guaranteed to be what u need;
+     *
+     * - second option is doing like this; for each item that u
+     * process at some level, shoot all the rays coming up from
+     * this point and then for each level that is crossed,
+     * add it to the array; in fact, you would be spending a lot
+     * of time ( which would be proportional to n^2 ) by doing do
+     * just because of the fact that you would need to manually
+     * process every slab (that would be wasteful)
+     *
+     * first option is better;
+     *
+     * also need to get the tree that would sort these segments;
+     * a tree that would sort implicityly the segments by
+     * insert/remove operations; then u would iterate the tree
+     * and collect the segments in the right order;
+     *
+     * here is the problem; if unwrap sees None, it
+     * panicks; of course it will. handle that? yes;
+     *
+     * the slabs should be allocated in advance;
+     * ```
      *       b
      *  -----+-----| level 3
      *     a |     |
@@ -123,6 +99,7 @@ impl<'a> SearchStructure <'a> {
      * [level 1] -> add line(c, a), line(c, b)
      * [level 2] -> remove line(c, a)
      * [level 3] -> remove line(c, b)
+     * ```
      */
 
     fn accept_next_level (&mut self, level: &[(i32, i32)]) {
@@ -144,7 +121,7 @@ impl<'a> SearchStructure <'a> {
                                         y : above_point.1.into() }
                 };
 
-                let converted_line = CompLine { val : new_verical_delimiter };
+                let converted_line = library_types::CompLine { val : new_verical_delimiter };
 
                 self.intermediate.as_mut().unwrap().
                     insert(converted_line);
@@ -159,7 +136,7 @@ impl<'a> SearchStructure <'a> {
                     Coordinate::<f64> { x : below_point.0.into(),
                                         y : below_point.1.into() }
                 };
-                let converted_line = CompLine { val : new_verical_delimiter };
+                let converted_line = library_types::CompLine { val : new_verical_delimiter };
                 self.intermediate.as_mut().unwrap().
                     remove(&converted_line);
             }
