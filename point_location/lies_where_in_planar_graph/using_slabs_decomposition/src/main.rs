@@ -84,7 +84,7 @@ impl<'a> SearchStructure<'a> {
      *
      */
 
-    fn accept_next_level (&'a mut self, line_up: &[usize],
+    fn accept_next_level (& mut self, line_up: &[usize],
                           line_down : &[usize]) {
 
         // select each line in the line_up
