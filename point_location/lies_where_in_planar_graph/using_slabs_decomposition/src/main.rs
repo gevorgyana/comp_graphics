@@ -5,29 +5,31 @@ mod library_types;
 use crate::library_types as types;
 
 /**
- * this structure contains the slabs
- * and I define searching methods on it
- * later in this code
+ * This structure contains the slabs after last level is
+ * passed to accept_next_level().
  */
 
 #[allow(unused)]
-pub struct SearchStructure {
-    pub data : Option<Vec<library_types::CompLine>>,
-    pub slabs : Option<Vec<library_types::CompLine>>,
-    pub tree : Option<BTreeSet<library_types::CompLine>>,
+pub struct SearchStructure <'a> {
+    pub data : Vec<library_types::CompLine>,
+    // slabs are references to data, this way, no memory
+    // duplication happens. note: referecnes do not need
+    // to be mutable, this was a mistake previously.
+    pub slabs : Vec<Vec<&'a library_types::CompLine>>,
+    pub tree : BTreeSet<library_types::CompLine>,
 }
 
-impl Default for SearchStructure {
+impl<'a> Default for SearchStructure<'a> {
     fn default() -> Self {
         Self {
-            data : None,
-            slabs : None,
-            tree : None
+            data : Default::default(),
+            slabs : Default::default(),
+            tree : Default::default()
         }
     }
 }
 
-impl SearchStructure {
+impl<'a> SearchStructure<'a> {
 
     /**
      * For each line going from it upwards that has not yet
@@ -65,20 +67,63 @@ impl SearchStructure {
      * that start from the y-level that is being currently processed.
      * One of the ideas is to accept the line from input and not shorten
      * it when we are processing multiple levels.
+     *
+     * When after processing level_start, slabs is empty, that
+     * means that we found the upper layer and should stop at
+     * this step.
+     *
+     * Each line is processed in this way; find if we currently have
+     * any lines that are not closed by calculating the amount of lines
+     * in the tree after we add what we have in line_up and remove what
+     * we have in line_down. When finished, if the tree is empty, that
+     * means the current line that is being processed belongs to the
+     * topmost slab in the resulting data structure. If there are any
+     * non-closed lines, then there will be more slabs in next queries.
+     * If there will be more lines in the next queries, add a slab to
+     * the vector.
+     *
      */
 
-    fn accept_next_level (&mut self, level: &mut[usize]) {
-        for _index in level.iter() {
-            let _line : &types::CompLine = &self.data.as_ref().unwrap()[level[0]];
-            self.tree.as_mut().unwrap().insert(*_line);
+    fn accept_next_level (&'a mut self, line_up: &[usize],
+                          line_down : &[usize]) {
+
+        // select each line in the line_up
+        for index in line_up.iter() {
+            let line : &types::CompLine =
+                &self.data[line_up[*index]];
+            // add it to the tree
+            self.tree.insert(*line);
+        }
+
+        // select each line in line_down
+        for index in line_down.iter() {
+            let line : &types::CompLine =
+                &self.data[line_down[*index]];
+            // remove it from the tree
+            self.tree.remove(line);
+        }
+
+        /*
+         * If the tree is not empty, we are dealing with the topmost
+         * level, which closes the last (highest) slab. This means
+         * that we have to add one slab to the vector, which will
+         * be closed somewhere at the next levels.
+         */
+
+        if !self.tree.is_empty() {
+            self.slabs.push(Vec::default());
+        }
+
+        for _i in self.tree.iter() {
+            self.slabs.last_mut().unwrap().push(&_i);
         }
     }
 }
 
 #[allow(unused)]
 fn preprocess(points : &mut Vec<Coordinate<f64>>) {
-    let mut search_structure = SearchStructure{..Default::default()};
-    //search_structure.accept_next_level(&mut[0]);
+    let mut search_structure : SearchStructure = Default::default();
+    search_structure.accept_next_level(&[0], &[0]);
 }
 
 fn main() {
