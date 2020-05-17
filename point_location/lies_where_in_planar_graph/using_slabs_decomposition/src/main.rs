@@ -9,7 +9,6 @@ use crate::library_types as types;
  * passed to accept_next_level().
  */
 
-#[allow(unused)]
 pub struct SearchStructure <'a> {
     pub data : Vec<library_types::CompLine>,
     // slabs are references to data, this way, no memory
@@ -32,9 +31,9 @@ impl<'a> Default for SearchStructure<'a> {
 impl<'a> SearchStructure<'a> {
 
     /**
-     * For each line going from it upwards that has not yet
+     * For each line going upwards that has not yet
      * been covered, draw a line to it. The upper point of
-     * each line is located at, say, l2, and the lower point is
+     * each line is located at, say, y-level l2, and the lower point is
      * at l1. For every level that has been crossed, (l1 < l <= l2)
      * segment (l, x(l)) is used for locating the test point,
      * where l is the level's y-value, and x(l) is given by the
@@ -63,28 +62,26 @@ impl<'a> SearchStructure<'a> {
      * at level 2 line a'b still exists, where 'b is the intersection of
      * level 2 and ab.
      *
-     * @param{level} contains the indices of all the lines in @field{data}
+     * __level__ contains the indices of all the lines in __data__
      * that start from the y-level that is being currently processed.
      * One of the ideas is to accept the line from input and not shorten
      * it when we are processing multiple levels.
      *
-     * When after processing level_start, slabs is empty, that
-     * means that we found the upper layer and should stop at
-     * this step.
+     * If, after processing line_up, __slabs__ is empty, we found the
+     * upper layer and should stop at this step.
      *
      * Each line is processed in this way; find if we currently have
-     * any lines that are not closed by calculating the amount of lines
+     * any lines that are not closed, by calculating the amount of lines
      * in the tree after we add what we have in line_up and remove what
      * we have in line_down. When finished, if the tree is empty, that
-     * means the current line that is being processed belongs to the
+     * means the line that is being processed belongs to the
      * topmost slab in the resulting data structure. If there are any
      * non-closed lines, then there will be more slabs in next queries.
-     * If there will be more lines in the next queries, add a slab to
+     * If there are more lines in the next queries, add a slab to
      * the vector.
-     *
      */
 
-    fn accept_next_level (& mut self, line_up: &[usize],
+    fn accept_next_level (&'a mut self, line_up: &[usize],
                           line_down : &[usize]) {
 
         // select each line in the line_up
