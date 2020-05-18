@@ -1,14 +1,15 @@
 use geo::{Line};
-use std::cmp::Ordering::{self, Less, Greater};
+use std::cmp::Ordering::{self, Less, Greater, Equal};
 
-#[derive(Copy, Clone)]
+//#[derive(Copy, Clone)]
 pub struct CompLine {
     pub val : Line<f64>,
 }
 
 impl Ord for CompLine {
     fn cmp(&self, other : &Self) -> Ordering {
-        if self.val.start.x < other.val.start.x {Less}
+        if self.val.start.x == other.val.start.x {Equal}
+        else if self.val.start.x < other.val.start.x {Less}
         else {Greater}
     }
 }
@@ -23,6 +24,6 @@ impl Eq for CompLine {}
 
 impl PartialEq for CompLine {
     fn eq(&self, other : &Self) -> bool {
-        self.val.start.x == other.val.start.x
+        self.cmp(other) == Equal
     }
 }
