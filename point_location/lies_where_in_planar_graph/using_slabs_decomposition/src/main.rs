@@ -1,5 +1,6 @@
 use geo::{Coordinate};
 use std::collections::BTreeSet;
+use std::rc::Rc;
 
 mod library_types;
 use crate::library_types as types;
@@ -9,16 +10,16 @@ use crate::library_types as types;
  * passed to accept_next_level().
  */
 
-pub struct SearchStructure <'a> {
+pub struct SearchStructure {
     pub data : Vec<library_types::CompLine>,
     // slabs are references to data, this way, no memory
-    // duplication happens. note: referecnes do not need
+    // duplication happens. note: references do not need
     // to be mutable, this was a mistake previously.
-    pub slabs : Vec<Vec<&'a library_types::CompLine>>,
+    pub slabs : Vec<Vec<Rc<library_types::CompLine>>>,
     pub tree : BTreeSet<library_types::CompLine>,
 }
 
-impl<'a> Default for SearchStructure<'a> {
+impl Default for SearchStructure {
     fn default() -> Self {
         Self {
             data : Default::default(),
@@ -28,7 +29,7 @@ impl<'a> Default for SearchStructure<'a> {
     }
 }
 
-impl<'a> SearchStructure<'a> {
+impl SearchStructure {
 
     /**
      * For each line going upwards that has not yet
@@ -81,27 +82,23 @@ impl<'a> SearchStructure<'a> {
      * the vector.
      */
 
-    fn accept_next_level (&'a mut self, line_up: &[usize],
+    fn accept_next_level (& mut self, line_up: &[usize],
                           line_down : &[usize]) {
 
-        // select each line in the line_up
         for index in line_up.iter() {
             let line : &types::CompLine =
                 &self.data[line_up[*index]];
-            // add it to the tree
             self.tree.insert(*line);
         }
 
-        // select each line in line_down
         for index in line_down.iter() {
             let line : &types::CompLine =
                 &self.data[line_down[*index]];
-            // remove it from the tree
             self.tree.remove(line);
         }
 
         /*
-         * If the tree is not empty, we are dealing with the topmost
+         * If the tree is not empty, we are not dealing with the topmost
          * level, which closes the last (highest) slab. This means
          * that we have to add one slab to the vector, which will
          * be closed somewhere at the next levels.
@@ -112,7 +109,7 @@ impl<'a> SearchStructure<'a> {
         }
 
         for _i in self.tree.iter() {
-            self.slabs.last_mut().unwrap().push(&_i);
+            self.slabs.last_mut().unwrap().push(Rc::new(*_i));
         }
     }
 }
@@ -126,4 +123,35 @@ fn preprocess(points : &mut Vec<Coordinate<f64>>) {
 fn main() {
     let mut vec = vec![Coordinate {x : 1.0, y : 2.0}];
     preprocess(&mut vec);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use geo::Line;
+    #[test]
+    fn test_add_next_level() {
+        /*  ___+_
+         * |  /-----line that lies inside the slab
+         * |_+___   between two plus signs
+         */
+        let mut search_structure : SearchStructure = Default::default();
+        search_structure.data = vec![
+            types::CompLine { val :
+                              Line::<f64> {
+                                  start :
+                                  Coordinate::<f64> {
+                                      x : 0.0,
+                                      y : 0.0
+                                  },
+                                  end :
+                                  Coordinate::<f64> {
+                                      x : 1.0,
+                                      y : 1.0
+                                  }
+                              }}];
+        search_structure.accept_next_level(&[0], &[]);
+        search_structure.accept_next_level(&[], &[0]);
+        //assert_eq!(search_structure.slabs.len(), 1);
+    }
 }
