@@ -12,9 +12,6 @@ use crate::library_types as types;
 
 pub struct SearchStructure {
     pub data : Vec<library_types::CompLine>,
-    // slabs are references to data, this way, no memory
-    // duplication happens. note: references do not need
-    // to be mutable, this was a mistake previously.
     pub slabs : Vec<Vec<Rc<library_types::CompLine>>>,
     pub tree : BTreeSet<library_types::CompLine>,
 }
@@ -82,19 +79,37 @@ impl SearchStructure {
      * the vector.
      */
 
-    fn accept_next_level (& mut self, line_up: &[usize],
+    fn accept_next_level (&mut self, line_up: &[usize],
                           line_down : &[usize]) {
 
         for index in line_up.iter() {
             let line : &types::CompLine =
                 &self.data[line_up[*index]];
-            self.tree.insert(*line);
+            println!("insert into tree: id {}... status is", line.val.end.x);
+            let retval = self.tree.insert(*line);
+            if retval == true {
+                println!("success! the tree contains...");
+                for j in self.tree.iter() {
+                    println!("{:?}", j.val.end.x);
+                }
+            }
+            else { println!("failed!"); }
         }
 
         for index in line_down.iter() {
             let line : &types::CompLine =
                 &self.data[line_down[*index]];
-            self.tree.remove(line);
+            println!("remove form the tree: id {}", line.val.end.x);
+            let retval = self.tree.remove(line);
+            if retval == true {
+                println!("success! the tree contains...");
+                for j in self.tree.iter() {
+                    println!("{:?}", j.val.end.x);
+                }
+            }
+
+            // bug; this fails all the time!
+            else { println!("failed!") }
         }
 
         /*
@@ -104,11 +119,16 @@ impl SearchStructure {
          * be closed somewhere at the next levels.
          */
 
+        println!("the slabs length before modification {}", self.slabs.len());
+
         if !self.tree.is_empty() {
+            println!("push empty vector to slabs because tree has {} elements",
+            self.tree.len());
             self.slabs.push(Vec::default());
         }
 
         for _i in self.tree.iter() {
+            println!("add to last vector in slabs, id : {}",  _i.val.end.x);
             self.slabs.last_mut().unwrap().push(Rc::new(*_i));
         }
     }
@@ -129,6 +149,18 @@ fn main() {
 mod tests {
     use super::*;
     use geo::Line;
+
+    #[test]
+    fn iterating_over_map_works() {
+        let mut set = BTreeSet::<i32>::default();
+        set.insert(1);
+        assert_eq!(1, set.len());
+        for i in [1].iter() {
+            set.remove(i);
+        }
+        assert_eq!(0, set.len());
+    }
+
     #[test]
     fn test_add_next_level() {
         /*  ___+_
@@ -151,7 +183,80 @@ mod tests {
                                   }
                               }}];
         search_structure.accept_next_level(&[0], &[]);
+        assert_eq!(search_structure.tree.len(), 1);
         search_structure.accept_next_level(&[], &[0]);
-        //assert_eq!(search_structure.slabs.len(), 1);
+        assert_eq!(search_structure.data.len(), 1);
+        // this fails UNCOMMENT TO SEE FAILURE!!!!!!!!!!!!!
+        // assert_eq!(search_structure.slabs.len(), 1);
+    }
+
+    #[test]
+    fn test_tree_remembers_inserted_elements() {
+        /*  ___+_
+         * |  /-----line that lies inside the slab
+         * |_+___   between two plus signs
+         */
+        let mut search_structure : SearchStructure = Default::default();
+        search_structure.data = vec![
+            types::CompLine { val :
+                              Line::<f64> {
+                                  start :
+                                  Coordinate::<f64> {
+                                      x : 0.0,
+                                      y : 0.0
+                                  },
+                                  end :
+                                  Coordinate::<f64> {
+                                      x : 1.0,
+                                      y : 1.0
+                                  }
+                              }}];
+        search_structure.accept_next_level(&[0], &[]);
+        search_structure.accept_next_level(&[0], &[]);
+        assert_eq!(search_structure.tree.len(), 2);
+    }
+
+    #[test]
+    fn test_tree_does_not_remember_to_remove_if_elements_are_clearly_different_and_segfaults() {
+        /*  ___+_
+         * |  /-----line that lies inside the slab
+         * |_+___   between two plus signs
+         */
+        let mut search_structure : SearchStructure = Default::default();
+        search_structure.data = vec![
+            types::CompLine { val :
+                              Line::<f64> {
+                                  start :
+                                  Coordinate::<f64> {
+                                      x : 0.0,
+                                      y : 0.0
+                                  },
+                                  end :
+                                  Coordinate::<f64> {
+                                      x : 1.0,
+                                      y : 1.0
+                                  }
+                              }},
+
+            types::CompLine { val :
+                              Line::<f64> {
+                                  start :
+                                  Coordinate::<f64> {
+                                      x : 3.0,
+                                      y : 3.0
+                                  },
+                                  end :
+                                  Coordinate::<f64> {
+                                      x : 4.0,
+                                      y : 4.0
+                                  }
+                              }}
+        ];
+        search_structure.accept_next_level(&[0, 1], &[]);
+        // this segfaults
+        //search_structure.accept_next_level(&[] ,&[1]);
+        // and this does not remove
+        //search_structure.accept_next_level(&[] ,&[0]);
+        assert_eq!(search_structure.tree.len(), 1);
     }
 }
