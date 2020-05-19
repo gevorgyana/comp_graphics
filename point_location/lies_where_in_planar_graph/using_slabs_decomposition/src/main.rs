@@ -2,8 +2,8 @@ use geo::{Coordinate};
 use std::collections::BTreeSet;
 use std::rc::Rc;
 
-mod library_types;
-use crate::library_types as types;
+mod ltypes;
+use crate::ltypes as types;
 
 /**
  * This structure contains the slabs after last level is
@@ -11,9 +11,10 @@ use crate::library_types as types;
  */
 
 pub struct SearchStructure {
-    pub data : Vec<library_types::CompLine>,
-    pub slabs : Vec<Vec<Rc<library_types::CompLine>>>,
-    pub tree : BTreeSet<library_types::CompLine>,
+    // data lives somewhere in heap
+    pub data : Vec<Rc<types::L>>,
+    pub slabs : Vec<Vec<Rc<types::L>>>,
+    pub tree : BTreeSet<Rc<types::L>>,
 }
 
 impl Default for SearchStructure {
@@ -79,37 +80,16 @@ impl SearchStructure {
      * the vector.
      */
 
-    fn accept_next_level (&mut self, line_up: &[usize],
-                          line_down : &[usize]) {
+    fn accept_next_level (&mut self,
+                          up: &[Rc<types::L>],
+                          down: &[Rc<types::L>]) {
 
-        for index in line_up.iter() {
-            let line : &types::CompLine =
-                &self.data[line_up[*index]];
-            println!("insert into tree: id {}... status is", line.val.end.x);
-            let retval = self.tree.insert(*line);
-            if retval == true {
-                println!("success! the tree contains...");
-                for j in self.tree.iter() {
-                    println!("{:?}", j.val.end.x);
-                }
-            }
-            else { println!("failed!"); }
+        for index in up.iter() {
+            self.tree.insert(index.clone());
         }
 
-        for index in line_down.iter() {
-            let line : &types::CompLine =
-                &self.data[line_down[*index]];
-            println!("remove form the tree: id {}", line.val.end.x);
-            let retval = self.tree.remove(line);
-            if retval == true {
-                println!("success! the tree contains...");
-                for j in self.tree.iter() {
-                    println!("{:?}", j.val.end.x);
-                }
-            }
-
-            // bug; this fails all the time!
-            else { println!("failed!") }
+        for index in down.iter() {
+            self.tree.remove(index);
         }
 
         /*
@@ -119,47 +99,26 @@ impl SearchStructure {
          * be closed somewhere at the next levels.
          */
 
-        println!("the slabs length before modification {}", self.slabs.len());
-
         if !self.tree.is_empty() {
-            println!("push empty vector to slabs because tree has {} elements",
-            self.tree.len());
             self.slabs.push(Vec::default());
         }
 
+        // can I rewrite this to be more functional?
+        let current_slab = self.slabs.len() - 1;
         for _i in self.tree.iter() {
-            println!("add to last vector in slabs, id : {}",  _i.val.end.x);
-            self.slabs.last_mut().unwrap().push(Rc::new(*_i));
+            &mut self.slabs[current_slab].push(_i.clone());
         }
     }
 }
 
-#[allow(unused)]
-fn preprocess(points : &mut Vec<Coordinate<f64>>) {
-    let mut search_structure : SearchStructure = Default::default();
-    search_structure.accept_next_level(&[0], &[0]);
-}
-
 fn main() {
-    let mut vec = vec![Coordinate {x : 1.0, y : 2.0}];
-    preprocess(&mut vec);
+    let mut _search_structure : SearchStructure = Default::default();
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use geo::Line;
-
-    #[test]
-    fn iterating_over_map_works() {
-        let mut set = BTreeSet::<i32>::default();
-        set.insert(1);
-        assert_eq!(1, set.len());
-        for i in [1].iter() {
-            set.remove(i);
-        }
-        assert_eq!(0, set.len());
-    }
 
     #[test]
     fn test_add_next_level() {
@@ -169,7 +128,7 @@ mod tests {
          */
         let mut search_structure : SearchStructure = Default::default();
         search_structure.data = vec![
-            types::CompLine { val :
+            types::L { val :
                               Line::<f64> {
                                   start :
                                   Coordinate::<f64> {
@@ -190,31 +149,6 @@ mod tests {
         // assert_eq!(search_structure.slabs.len(), 1);
     }
 
-    #[test]
-    fn test_tree_remembers_inserted_elements() {
-        /*  ___+_
-         * |  /-----line that lies inside the slab
-         * |_+___   between two plus signs
-         */
-        let mut search_structure : SearchStructure = Default::default();
-        search_structure.data = vec![
-            types::CompLine { val :
-                              Line::<f64> {
-                                  start :
-                                  Coordinate::<f64> {
-                                      x : 0.0,
-                                      y : 0.0
-                                  },
-                                  end :
-                                  Coordinate::<f64> {
-                                      x : 1.0,
-                                      y : 1.0
-                                  }
-                              }}];
-        search_structure.accept_next_level(&[0], &[]);
-        search_structure.accept_next_level(&[0], &[]);
-        assert_eq!(search_structure.tree.len(), 2);
-    }
 
     #[test]
     fn test_tree_does_not_remember_to_remove_if_elements_are_clearly_different_and_segfaults() {
@@ -224,7 +158,7 @@ mod tests {
          */
         let mut search_structure : SearchStructure = Default::default();
         search_structure.data = vec![
-            types::CompLine { val :
+            types::L { val :
                               Line::<f64> {
                                   start :
                                   Coordinate::<f64> {
@@ -238,7 +172,7 @@ mod tests {
                                   }
                               }},
 
-            types::CompLine { val :
+            types::L { val :
                               Line::<f64> {
                                   start :
                                   Coordinate::<f64> {
@@ -252,11 +186,9 @@ mod tests {
                                   }
                               }}
         ];
-//        search_structure.accept_next_level(&[0, 1], &[]);
-        // this segfaults
-        //search_structure.accept_next_level(&[] ,&[1]);
-        // and this does not remove
-        //search_structure.accept_next_level(&[] ,&[0]);
-//        assert_eq!(search_structure.tree.len(), 1);
     }
+
+    // todo test that types work ; this should be done in the other
+    // module; here, test if the next_level_works(); also, in the other
+    // module, test if the types can be properly stored.
 }
