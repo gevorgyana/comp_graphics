@@ -120,45 +120,17 @@ mod tests {
     use super::*;
     use geo::Line;
 
+
     #[test]
-    fn test_add_next_level() {
+    fn test_general() {
         /*  ___+_
          * |  /-----line that lies inside the slab
          * |_+___   between two plus signs
          */
         let mut search_structure : SearchStructure = Default::default();
         search_structure.data = vec![
-            types::L { val :
-                              Line::<f64> {
-                                  start :
-                                  Coordinate::<f64> {
-                                      x : 0.0,
-                                      y : 0.0
-                                  },
-                                  end :
-                                  Coordinate::<f64> {
-                                      x : 1.0,
-                                      y : 1.0
-                                  }
-                              }}];
-        search_structure.accept_next_level(&[0], &[]);
-        assert_eq!(search_structure.tree.len(), 1);
-        search_structure.accept_next_level(&[], &[0]);
-        assert_eq!(search_structure.data.len(), 1);
-        // this fails UNCOMMENT TO SEE FAILURE!!!!!!!!!!!!!
-        // assert_eq!(search_structure.slabs.len(), 1);
-    }
-
-
-    #[test]
-    fn test_tree_does_not_remember_to_remove_if_elements_are_clearly_different_and_segfaults() {
-        /*  ___+_
-         * |  /-----line that lies inside the slab
-         * |_+___   between two plus signs
-         */
-        let mut search_structure : SearchStructure = Default::default();
-        search_structure.data = vec![
-            types::L { val :
+            Rc::new (
+            types::L { line :
                               Line::<f64> {
                                   start :
                                   Coordinate::<f64> {
@@ -171,8 +143,9 @@ mod tests {
                                       y : 1.0
                                   }
                               }},
-
-            types::L { val :
+            ),
+            Rc::new(
+            types::L { line :
                               Line::<f64> {
                                   start :
                                   Coordinate::<f64> {
@@ -185,7 +158,14 @@ mod tests {
                                       y : 4.0
                                   }
                               }}
+            ),
         ];
+
+        assert_eq!(2, search_structure.data.len());
+        search_structure.accept_next_level(&[search_structure.data[0].clone()], &[]);
+        assert_eq!(1, search_structure.tree.len());
+        search_structure.accept_next_level(&[], &[search_structure.data[0].clone()]);
+        assert_eq!(0, search_structure.tree.len());
     }
 
     // todo test that types work ; this should be done in the other
