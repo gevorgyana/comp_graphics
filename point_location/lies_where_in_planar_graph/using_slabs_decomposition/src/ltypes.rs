@@ -1,5 +1,5 @@
 use geo::{Line};
-use std::cmp::Ordering::{self, Less, Greater, Equal};
+use std::cmp::Ordering;
 
 pub struct L {
     pub line : Line<f64>
@@ -7,7 +7,10 @@ pub struct L {
 
 impl PartialEq for L {
     fn eq(&self, other : &Self) -> bool {
-        self.line.start.x == other.line.start.x
+        self.line.start.x == other.line.start.x &&
+            self.line.start.y == other.line.start.y &&
+            self.line.end.x == other.line.end.x &&
+            self.line.end.y == other.line.end.y
     }
 }
 
@@ -19,12 +22,26 @@ impl PartialOrd for L {
     }
 }
 
-/// this is the logic of comparing lines
+/**
+ * Sort the lines (think of them as directed upwards). Sort them
+ * by the position on the `start` values on Y-axis, and then by their
+ * `start` coordinate's X-value, and then by their angle
+ * ```dY / dX * (-1, if angle > 90)```
+ */
 
 impl Ord for L {
     fn cmp(&self, other : &Self) -> Ordering {
-        if self.line.start.x == other.line.start.x { Ordering::Equal }
-        else if self.line.start.x < other.line.start.x { Ordering::Less }
+
+        if self.eq(other) == true { Ordering::Equal }
+
+        else if
+            self.line.start.y < other.line.start.y ||
+            self.line.start.x < other.line.start.x ||
+            self.line.start.x == other.line.start.x &&
+            self.line.slope() < other.line.slope()
+
+        { Ordering::Less }
+
         else { Ordering::Greater }
     }
 }

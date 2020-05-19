@@ -1,4 +1,3 @@
-use geo::{Coordinate};
 use std::collections::BTreeSet;
 use std::rc::Rc;
 
@@ -109,6 +108,18 @@ impl SearchStructure {
             &mut self.slabs[current_slab].push(_i.clone());
         }
     }
+
+    /// Consumes lines and passes them down to the search structure;
+    /// after this method is called, user code can query the data
+    /// structure. This should be opened to user code as part of
+    /// public API. We need to consume a vector, therefore a reference
+    /// is not enough, therefore need ownership. Need to sort the
+    /// vector, therefore need mutability.
+
+    fn consume_lines(&mut self, mut input : Vec<types::L>) {
+        input.sort_by(|x, y| x.cmp(y));
+        input.into_iter().map(|x| self.data.push(Rc::new(x)));
+    }
 }
 
 fn main() {
@@ -176,8 +187,4 @@ mod tests {
         assert_eq!(0., search_structure.slabs[0][0].line.start.x);
         assert_eq!(0., search_structure.slabs[0][0].line.start.y);
     }
-
-    // todo test that types work ; this should be done in the other
-    // module; here, test if the next_level_works(); also, in the other
-    // module, test if the types can be properly stored.
 }
