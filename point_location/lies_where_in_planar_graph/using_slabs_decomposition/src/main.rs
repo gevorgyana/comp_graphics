@@ -161,11 +161,20 @@ mod tests {
             ),
         ];
 
+        // we can actually insert and remove lines into
+        // the internal representation
         assert_eq!(2, search_structure.data.len());
-        search_structure.accept_next_level(&[search_structure.data[0].clone()], &[]);
+        search_structure.accept_next_level(
+            &[search_structure.data[0].clone()], &[]);
         assert_eq!(1, search_structure.tree.len());
-        search_structure.accept_next_level(&[], &[search_structure.data[0].clone()]);
+        search_structure.accept_next_level(
+            &[], &[search_structure.data[0].clone()]);
         assert_eq!(0, search_structure.tree.len());
+
+        // and the slabs are correct
+        assert_eq!(1, search_structure.slabs.len());
+        assert_eq!(0., search_structure.slabs[0][0].line.start.x);
+        assert_eq!(0., search_structure.slabs[0][0].line.start.y);
     }
 
     // todo test that types work ; this should be done in the other
