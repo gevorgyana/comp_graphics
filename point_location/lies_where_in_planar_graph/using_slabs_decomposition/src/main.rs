@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 use std::rc::Rc;
+//use slice_group_by::GroupBy;
+//use std::cmp::Ordering;
 
 mod ltypes;
 use crate::ltypes as types;
@@ -118,7 +120,45 @@ impl SearchStructure {
 
     fn consume_lines(&mut self, mut input : Vec<types::L>) {
         input.sort_by(|x, y| x.cmp(y));
-        input.into_iter().map(|x| self.data.push(Rc::new(x)));
+        for i in input.into_iter() {
+            self.data.push(Rc::new(i));
+        }
+    }
+
+    /// requires that consume_lines has been called and that the
+    /// field of the struct do not contain old data. Thinks that the
+    /// data is sorted.
+
+    fn preprocess(&mut self) {
+        //for i in self.data.linear_group_by(|x, y| x == y) {
+            // i.split(|x| x == x);
+        //}
+
+        // excessive clones may be a problem - todo only one clone
+        let mut starts = self.data.clone();
+        let mut ends = self.data.clone();
+
+        starts.sort_by(|x, y| x.cmp(y));
+        ends.sort_by(|x, y| x.cmp(y));
+
+        let mut events = Vec::<types::EventType>::new();
+
+        for i in starts {
+            events.push(types::EventType::Begins(i));
+        }
+
+        for i in ends {
+            events.push(types::EventType::Ends(i));
+        }
+
+        events.sort();
+
+        // after the thing is sorted, i would like group it by using
+        // the commented logic above to select the elements that are
+        // equal and come together in groups, extract them from the
+        // vector, then process by a filter that would select the ones
+        // that are of type Begins/Ends, and pass them as two different
+        // parameters to the function descrived above.
     }
 }
 

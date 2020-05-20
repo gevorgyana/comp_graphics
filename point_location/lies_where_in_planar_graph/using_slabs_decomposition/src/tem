@@ -1,0 +1,68 @@
+```
+let mut starts = self.data.clone();
+let mut ends = self.data.clone();
+
+starts.sort_by(|x, y|
+if x.line.start.y < y.line.start.y
+{ Ordering::Less }
+else if x.line.start.y == y.line.start.y
+{ Ordering::Equal }
+else { Ordering::Greater }
+);
+
+ends.sort_by(|x, y|
+if x.line.end.y < y.line.end.y
+{ Ordering::Less }
+else if x.line.end.y == y.line.end.y
+{ Ordering::Equal }
+else { Ordering::Greater }
+);
+
+enum Event {
+Begins(Rc::<types::L>),
+Ends(Rc::<types::L>),
+};
+
+let mut events = Vec::<Event>::new();
+
+for i in starts {
+events.push(Event::Begins(i));
+}
+
+for i in ends {
+events.push(Event::Ends(i));
+}
+
+events.sort_by(
+/* how to sort this thing so that the following
+logic applies? */
+
+let lhs; let rhs;
+if x is Event::Begins(value), then
+lhs = value.start.y;
+else
+rhs = value.end.y;
+
+if y is Event::Begins(value), then
+lhs = value.start.y;
+else
+rhs = value.end.y;
+
+lhs.cmp(rhs);
+
+*/
+);
+
+// after the thing is sorted, I would like
+// to group it by using
+// the commented logic above to select
+// the elements that are
+// equal and come together in groups,
+// extract them from the
+// vector, then process by a filter that
+// would select the ones
+// that are of type Begins/Ends, and pass
+// them as two different
+// parameters to the function
+// described above.
+```

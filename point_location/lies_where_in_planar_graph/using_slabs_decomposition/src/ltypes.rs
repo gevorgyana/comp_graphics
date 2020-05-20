@@ -1,5 +1,6 @@
 use geo::{Line};
 use std::cmp::Ordering;
+use std::rc::Rc;
 
 pub struct L {
     pub line : Line<f64>
@@ -43,5 +44,76 @@ impl Ord for L {
         { Ordering::Less }
 
         else { Ordering::Greater }
+    }
+}
+
+pub enum EventType {
+    Begins(Rc<L>),
+    Ends(Rc<L>),
+}
+
+impl PartialEq for EventType {
+    fn eq(&self, other : &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
+
+impl Eq for EventType {}
+
+impl PartialOrd for EventType {
+    fn partial_cmp(&self, other : &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for EventType {
+    fn cmp(&self, other : &Self) -> Ordering {
+
+        match self {
+            EventType::Begins (lhs) => {
+                match other {
+                    EventType::Begins(rhs) => {
+                        if lhs.line.start.y == rhs.line.start.y {
+                            Ordering::Equal
+                        } else if lhs.line.start.y < rhs.line.start.y {
+                            Ordering::Less
+                        } else {
+                            Ordering::Greater
+                        }
+                    }
+                    EventType::Ends(rhs) => {
+                        if lhs.line.start.y == rhs.line.end.y {
+                            Ordering::Equal
+                        } else if lhs.line.start.y < rhs.line.end.y {
+                            Ordering::Less
+                        } else {
+                            Ordering::Greater
+                        }
+                    }
+                }
+            },
+            EventType::Ends(lhs) => {
+                match other {
+                    EventType::Begins(rhs) => {
+                        if lhs.line.end.y == rhs.line.start.y {
+                            Ordering::Equal
+                        } else if lhs.line.end.y < rhs.line.start.y {
+                            Ordering::Less
+                        } else {
+                            Ordering::Greater
+                        }
+                    }
+                    EventType::Ends(rhs) => {
+                        if lhs.line.end.y == rhs.line.end.y {
+                            Ordering::Equal
+                        } else if lhs.line.end.y < rhs.line.end.y {
+                            Ordering::Less
+                        } else {
+                            Ordering::Greater
+                        }
+                    }
+                }
+            },
+        }
     }
 }
