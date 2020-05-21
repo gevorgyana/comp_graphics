@@ -52,6 +52,15 @@ pub enum EventType {
     Ends(Rc<L>),
 }
 
+impl Clone for EventType {
+    fn clone(&self) -> EventType {
+        match self {
+            EventType::Begins(rc) => EventType::Begins(rc.clone()),
+            EventType::Ends(rc) => EventType::Ends(rc.clone()),
+        }
+    }
+}
+
 impl PartialEq for EventType {
     fn eq(&self, other : &Self) -> bool {
         self.cmp(other) == Ordering::Equal

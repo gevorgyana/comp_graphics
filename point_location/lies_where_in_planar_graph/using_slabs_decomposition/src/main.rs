@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 use std::rc::Rc;
-//use slice_group_by::GroupBy;
-//use std::cmp::Ordering;
+use itertools::Itertools;
 
 mod ltypes;
 use crate::ltypes as types;
@@ -130,35 +129,33 @@ impl SearchStructure {
     /// data is sorted.
 
     fn preprocess(&mut self) {
-        //for i in self.data.linear_group_by(|x, y| x == y) {
-            // i.split(|x| x == x);
-        //}
-
-        // excessive clones may be a problem - todo only one clone
-        let mut starts = self.data.clone();
-        let mut ends = self.data.clone();
-
-        starts.sort_by(|x, y| x.cmp(y));
-        ends.sort_by(|x, y| x.cmp(y));
-
-        let mut events = Vec::<types::EventType>::new();
-
-        for i in starts {
-            events.push(types::EventType::Begins(i));
+        let mut events : Vec<types::EventType> = Vec::new();
+        for i in &self.data {
+            events.push(types::EventType::Begins(i.clone()));
+            events.push(types::EventType::Ends(i.clone()));
         }
-
-        for i in ends {
-            events.push(types::EventType::Ends(i));
-        }
-
         events.sort();
-
-        // after the thing is sorted, i would like group it by using
-        // the commented logic above to select the elements that are
-        // equal and come together in groups, extract them from the
-        // vector, then process by a filter that would select the ones
-        // that are of type Begins/Ends, and pass them as two different
-        // parameters to the function descrived above.
+        let groups : Vec<Vec<types::EventType>> = events
+            .into_iter()
+            .group_by(|x| x.clone())
+            .into_iter()
+            .map(|(f, items)| items.collect())
+            .collect();
+        let mut begin : Vec<Rc<types::L>> = vec![];
+        let mut end : Vec<Rc<types::L>> = vec![];
+        for group in groups {
+            for group_element in group {
+                match group_element {
+                    types::EventType::Begins(value) => {
+                        begin.push(value);
+                    }
+                    types::EventType::Ends(value) => {
+                        end.push(value);
+                    }
+                }
+            }
+        }
+        self.accept_next_level(&begin, &end);
     }
 }
 
