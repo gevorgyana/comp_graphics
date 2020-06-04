@@ -159,6 +159,21 @@ impl SearchStructure {
     }
 }
 
+fn generate_lines_from_coordinates(points : Vec<geo::Coordinate<f64>>) -> std::vec::Vec<ltypes::L>{
+    points.iter()
+        .permutations(2) // every pair of lines
+        .filter(|e| e[0].y < e[1].y) // that are directed upwards
+        // convert to custom types
+        .map(|e|
+             types::L { line :
+                        geo::Line::<f64> {
+                            start : *e[0],
+                            end : *e[1]
+                        }},
+        )
+        .collect::<Vec<_>>()
+}
+
 fn main() {
     let mut _search_structure : SearchStructure = Default::default();
 }
@@ -167,10 +182,46 @@ fn main() {
 mod tests {
     use super::*;
     use geo::Line;
+    use geo::Coordinate;
 
+    /*
+    #[test]
+    fn integration_test() {}
+     test intergration between consumer and other three components
+     */
 
     #[test]
-    fn test_general() {
+    fn test_split_into_levels() {
+        let vec = vec![
+            Coordinate::<f64> {
+                x : 4.0,
+                y : 4.0
+            },
+            Coordinate::<f64> {
+                x : 1.0,
+                y : 2.0
+            }
+        ];
+        let data : Vec<_> = generate_lines_from_coordinates(vec);
+        assert_eq!(data, vec![
+            types::L { line :
+                       geo::Line::<f64> {
+                           start :
+                           Coordinate::<f64> {
+                               x : 1.0,
+                               y : 2.0
+                           },
+                           end :
+                           Coordinate::<f64> {
+                               x : 4.0,
+                               y : 4.0
+                           },
+                       }}
+        ]);
+    }
+
+    #[test]
+    fn test_accept_next_level() {
         /*  ___+_
          * |  /-----line that lies inside the slab
          * |_+___   between two plus signs
@@ -221,6 +272,8 @@ mod tests {
 
         // and the slabs are correct
         assert_eq!(1, search_structure.slabs.len());
+        println!("test");
+        println!("{:?}", search_structure.slabs[0]);
         assert_eq!(0., search_structure.slabs[0][0].line.start.x);
         assert_eq!(0., search_structure.slabs[0][0].line.start.y);
     }

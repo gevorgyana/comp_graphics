@@ -2,6 +2,7 @@ use geo::{Line};
 use std::cmp::Ordering;
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct L {
     pub line : Line<f64>
 }
