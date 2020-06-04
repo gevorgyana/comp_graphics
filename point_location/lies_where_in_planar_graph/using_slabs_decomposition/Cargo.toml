@@ -7,5 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-slice-group-by="0.2.6"
+itertools="0.9.0"
 geo="0.13.0"

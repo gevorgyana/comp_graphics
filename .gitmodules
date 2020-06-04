@@ -1,3 +1,0 @@
-[submodule "point_location/lies_where_in_planar_graph/using_slabs_decomposition/cpp/geometry.hpp"]
-	path = point_location/lies_where_in_planar_graph/using_slabs_decomposition/cpp/geometry.hpp
-	url = https://github.com/mapbox/geometry.hpp.git
