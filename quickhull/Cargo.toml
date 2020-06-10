@@ -1,0 +1,11 @@
+[package]
+name = "quickhull"
+version = "0.1.0"
+authors = ["Artyom Gevorgyan <artemhevorhian@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+geo = "0.13.0"
+num-traits = "0.2.11"
